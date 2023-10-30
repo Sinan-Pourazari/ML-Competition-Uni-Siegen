@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 data = pd.read_csv('train_features.csv')
+datatest = pd.read_csv('test_features.csv')
 
 Id = data['Id']
 f0 = data['feature_0']

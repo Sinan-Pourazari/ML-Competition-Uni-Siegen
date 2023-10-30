@@ -85,6 +85,8 @@ def runKnn(X, y):
 # y = np.loadtxt("train_label.csv", delimiter=",", skiprows=1)
 X = csv_to_array_np('train_features.csv')
 y = csv_to_array_np('train_label.csv')
+print(len(X))
+print(len(y))
 X, y = removeOutlier(X, y)
 X = normalizeScale(X)
 
