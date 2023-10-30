@@ -58,7 +58,7 @@ def runKnn(X,y):
 
     y=y[:,1]
 
-    model=KNeighborsClassifier(n_neighbors=5)
+    model=KNeighborsClassifier(n_neighbors=23)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
     model.fit(X_train,y_train)
     pred = model.predict(X_test)
@@ -73,6 +73,5 @@ y=csv_to_array_np('train_label.csv')
 X,y=removeOutlier(X,y)
 X=normalizeScale(X)
 
-normalizeScale(X)
 print(runKnn(X,y))
 

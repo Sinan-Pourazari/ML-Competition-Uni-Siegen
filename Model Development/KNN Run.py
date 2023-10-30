@@ -29,6 +29,17 @@ def removeOutlier(arrOrig, target):
 
     return (arr, y)
 
+def removeOutlierSing(arrOrig):
+    arr = arrOrig
+    for i in range(len(arr)):
+        lim = outlierDetec(arr[i])
+        for j in range(len(arr[i])):
+            if arr[i, j] < lim[0] or arr[i, j] > lim[1]:
+                for r in range(len(arr)):
+                    np.delete(arr[r], j)
+
+    return arr
+
 
 def csv_to_array_np(csv_file):
     data = np.loadtxt(open(csv_file, "rb"), delimiter=",", skiprows=1)
@@ -60,8 +71,9 @@ def normalizeScale(arr):
 def runKnn(X, y):
     y = y[:, 1]
     Xpred = csv_to_array_np('test_features.csv')
-
-    model = KNeighborsClassifier(n_neighbors=77)
+    #Xpred = removeOutlierSing(Xpred)
+    Xpred = scale(Xpred)
+    model = KNeighborsClassifier(n_neighbors=23)
     #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
     model.fit(X, y)
     pred = model.predict(Xpred)
