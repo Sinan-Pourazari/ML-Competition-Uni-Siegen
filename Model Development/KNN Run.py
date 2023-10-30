@@ -73,7 +73,7 @@ def runKnn(X, y):
     Xpred = csv_to_array_np('test_features.csv')
     #Xpred = removeOutlierSing(Xpred)
     Xpred = scale(Xpred)
-    model = KNeighborsClassifier(n_neighbors=23)
+    model = KNeighborsClassifier(n_neighbors=3)
     #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
     model.fit(X, y)
     pred = model.predict(Xpred)
