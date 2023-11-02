@@ -49,14 +49,10 @@ def csv_to_array(csv_file):
 #X=np.array(csv_to_array("train_features.csv"))
 #y=np.array(csv_to_array("train_label.csv"))
 
-def normalizeScale(arr):
-    temp =arr
-    return scale(temp)
 
 
 def runKnn(X,y, n):
 
-    y=y[:,1]
 
     model=KNeighborsClassifier(n_neighbors=n)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
@@ -71,11 +67,15 @@ def runKnn(X,y, n):
 #y = np.loadtxt("train_label.csv", delimiter=",", skiprows=1)
 X=csv_to_array_np('train_features.csv')
 y=csv_to_array_np('train_label.csv')
+y = y[:, 1]
+X = X[0:]
+print(X)
 #X=normalizeScale(X)
-X,y=removeOutlier(X,y)
+#X,y=removeOutlier(X,y)
 
 curf1=0
 bestN=0
+
 
 print(runKnn(X,y,3))
 #for i in range(1,389):
