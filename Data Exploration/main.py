@@ -4,24 +4,6 @@ import numpy as np
 from sklearn.preprocessing import scale
 import seaborn as sn
 
-def outlierDetec(arr):
-    q1= np.quantile(arr,0.25)
-    q3= np.quantile(arr, 0.75)
-    IQR= q3-q1
-    upper_lim=q3+(1.5*IQR)
-    lower_lim=q1-(1.5*IQR)
-    return [lower_lim, upper_lim]
-
-def removeOutlier(arrOrig):
-    arr=arrOrig
-    for i in range(len(arr)):
-        lim=outlierDetec(arr[i])
-        for j in range(len(arr[i])):
-            if arr[i,j] < lim[0] or arr[i,j] > lim[1]:
-                for r in range(len(arr)):
-                    np.delete(arr[r],j)
-
-    return arr
 
 data = pd.read_csv('train_features.csv')
 # datatest = pd.read_csv('test_features.csv')
@@ -102,14 +84,8 @@ print(data.nunique(axis=0, dropna=False))
 
 #### Correlation matrix ####
 
-#corr_matrix = data.corr()
-#sn.heatmap(corr_matrix, annot=True)
-
-#### Correlation matrix without outliers ####
-dataFilterd=removeOutlier(data.to_numpy())
-dataFilterd=pd.DataFrame(dataFilterd)
-corr_matrixFilterd = dataFilterd.corr()
-sn.heatmap(corr_matrixFilterd, annot=True)
+corr_matrix = data.corr()
+sn.heatmap(corr_matrix, annot=True, cmap='Blues')
 
 plt.show()
 
