@@ -6,6 +6,14 @@ import numpy as np
 from sklearn.metrics import f1_score
 import pandas as pd
 
+def removeFeature(arr,arr_Index):
+    temp=[]
+    for i in range(len(arr)):
+        for j in range(len(arr_Index)):
+            if i != arr_Index[j]:
+                temp.append(arr[i])
+    return temp
+
 def outlierDetec(arr):
     q1= np.quantile(arr,0.25)
     q3= np.quantile(arr, 0.75)
@@ -55,7 +63,7 @@ def runKnn(X,y, n):
 
 
     model=KNeighborsClassifier(n_neighbors=n)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
     X_train=scale(X_train)
     X_test=scale(X_test)
     model.fit(X_train,y_train)
@@ -68,21 +76,14 @@ def runKnn(X,y, n):
 X=csv_to_array_np('train_features.csv')
 y=csv_to_array_np('train_label.csv')
 y = y[:, 1]
-X = X[0:]
-print(X)
+X=pd.DataFrame(X)
+X=X.drop([0], axis=1)
+X=X.drop([1,9,3,4], axis=1)
+
+
 #X=normalizeScale(X)
 #X,y=removeOutlier(X,y)
 
-curf1=0
-bestN=0
 
-
+print(X)
 print(runKnn(X,y,3))
-#for i in range(1,389):
- #   temp= runKnn(X,y,i)
-  #  if curf1 < temp:
-   #     curf1= temp
-    #    bestN=i
-
-#print(curf1)
-#print(bestN)

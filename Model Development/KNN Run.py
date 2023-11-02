@@ -71,6 +71,9 @@ def normalizeScale(arr):
 def runKnn(X, y):
     y = y[:, 1]
     Xpred = csv_to_array_np('test_features.csv')
+    Xpred = pd.DataFrame(Xpred)
+    Xpred = Xpred.drop([0], axis=1)
+    Xpred = Xpred.drop([1, 9, 3, 4], axis=1)
     #Xpred = removeOutlierSing(Xpred)
     Xpred = scale(Xpred)
     model = KNeighborsClassifier(n_neighbors=3)
@@ -87,8 +90,12 @@ X = csv_to_array_np('train_features.csv')
 y = csv_to_array_np('train_label.csv')
 print(len(X))
 print(len(y))
-X, y = removeOutlier(X, y)
+#X, y = removeOutlier(X, y)
 X = normalizeScale(X)
+
+X=pd.DataFrame(X)
+X=X.drop([0], axis=1)
+X=X.drop([1,9,3,4], axis=1)
 
 normalizeScale(X)
 result = runKnn(X, y)
@@ -96,11 +103,13 @@ idarr = np.array([])
 for i in range(len(result)):
    idarr= np.append(idarr, i)
 
+
+
 result=np.round(result)
 
 
 return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
-return_value.to_csv('result3.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('result6.csv', columns=['Id', 'label'], index=False)
 #np.savetxt("result.csv", return_value, delimiter=",")
