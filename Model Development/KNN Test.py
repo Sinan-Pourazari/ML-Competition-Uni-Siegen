@@ -78,12 +78,27 @@ y=csv_to_array_np('train_label.csv')
 y = y[:, 1]
 X=pd.DataFrame(X)
 X=X.drop([0], axis=1)
-X=X.drop([1,9,3,4], axis=1)
+#X=X.drop([1,9,3,4], axis=1)
 
 
-#X=normalizeScale(X)
 #X,y=removeOutlier(X,y)
-
+#feature Selection
+currBestF1 =0
+dropped=0
+dropArray=[]
+for i in range(1,32):
+    dropArray.append([i])
 
 print(X)
-print(runKnn(X,y,3))
+print(dropArray)
+for i in dropArray:
+    tempX = pd.DataFrame(X)
+    tempX=tempX.drop(labels=i,axis=1)
+    tempX=np.array(tempX)
+    temp=runKnn(tempX,y,3)
+    if currBestF1< temp:
+        currBestF1=temp
+        dropped=i
+
+
+print(currBestF1, dropped )

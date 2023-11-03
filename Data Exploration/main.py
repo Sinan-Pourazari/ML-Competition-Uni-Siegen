@@ -5,10 +5,13 @@ from sklearn.preprocessing import scale
 import seaborn as sn
 
 
-data = pd.read_csv('train_features.csv')
-# datatest = pd.read_csv('test_features.csv')
+data = pd.read_csv('test_features.csv')
+#dataTarget = pd.read_csv('train_features.csv')
 
+#Join Targets inot the dataframe in order to look for corelations between features and labels
+#data=data.set_index('Id').join(dataTarget.set_index('Id'),rsuffix='Feat')
 
+print(data)
 feature_list = []
 feature_StringList = []
 
@@ -69,9 +72,9 @@ for i in range(2):
     temp.grid()
 
 fig, big = plt.subplots()
-big.plot(feature_list[0], feature_list[10], color='g', label=feature_StringList[10])
+big.plot(feature_list[0], feature_list[23], color='g', label=feature_StringList[23])
 big.set(xlabel='id')
-big.plot(feature_list[0], feature_list[20], color='r', label=feature_StringList[20])
+#big.plot(feature_list[0], feature_list[20], color='r', label=feature_StringList[20])
 plt.legend()
 big.grid()
 
