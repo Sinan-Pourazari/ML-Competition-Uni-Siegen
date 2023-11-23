@@ -12,7 +12,9 @@ def Run(Xtrain, ytrain, Xtest ):
     Xtest = scale(Xtest)
 
     #make model
-    MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.001, solver='sgd')
+    MLPC = MLPClassifier(random_state=211, max_iter=99999, learning_rate_init=0.0041, solver='sgd',
+                         learning_rate='adaptive')
+
     MLPC.fit(Xtrain,ytrain)
     pred = MLPC.predict(Xtest)
     # calculate f1-score
@@ -47,4 +49,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('MLPC1.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('MLPC2.csv', columns=['Id', 'label'], index=False)
