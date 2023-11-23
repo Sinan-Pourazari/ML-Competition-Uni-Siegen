@@ -43,18 +43,21 @@ plt.legend()
 big.grid()
 
 #Histograms
-fig, subplot_list = plt.subplots(3,1)
+fig, subplot_list = plt.subplots(3,1, layout='constrained', figsize=(34,20))
 for i in range(len(subplot_list)):
     subplot_list[i].hist(feature_list[i+1],bins=800)
     subplot_list[i].set(title=feature_StringList[i+1])
     subplot_list[i].margins(x=0)
+
+plt.savefig('Histogram.pdf', dpi=1200)
+
 
 #boxplots
 fig, subplot_list=plt.subplots(1, 3)
 for i in range(len(subplot_list)):
     subplot_list[i].boxplot(feature_list[i+1])
     subplot_list[i].set(title=feature_StringList[i+1])
-
+    subplot_list[i].margins(x=0)
 plt.show()
 
 # unique Values
