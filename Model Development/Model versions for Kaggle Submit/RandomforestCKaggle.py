@@ -3,40 +3,48 @@ from sklearn.metrics import f1_score
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import scale
-from sklearn.neural_network import MLPClassifier
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.ensemble import RandomForestClassifier
 
-def Run(Xtrain, ytrain, Xtest ):
-    # scale
-    Xtrain = scale(Xtrain)
-    Xtest = scale(Xtest)
 
-    #make model
-    MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.0041,
-                         solver='sgd', learning_rate='adaptive', activation='relu',
-                         shuffle= True, n_iter_no_change=3, momentum= 0.9, nesterovs_momentum= True)
-    MLPC.fit(Xtrain,ytrain)
-    pred = MLPC.predict(Xtest)
-    # calculate f1-score
+
+def Run(Xtrain,ytrain,Xtest):
+
+    #build randomforrest
+    randomforest=RandomForestClassifier(random_state=211, n_estimators=100, criterion='entropy', min_samples_split=2)
+    randomforest.fit(Xtrain, ytrain)
+
+    #make Prediction
+    pred =randomforest.predict(Xtest)
+
     return pred
-
 
 #read csv
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
-predFeatures = pd.read_csv('test_features.csv')
+testfeatures = pd.read_csv('test_features.csv')
+
 
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-predFeatures = predFeatures.drop(['Id'], axis=1)
+testfeatures= testfeatures.drop(['Id'], axis=1)
+
+
+
+
 
 #convert to numpyarray
 features=features.to_numpy()
 labels=labels.to_numpy().flatten()
-predFeatures = predFeatures.to_numpy()
+testfeatures.to_numpy()
 
-#make the bodel
-result = Run(features,labels, predFeatures)
+#basic preprossesing
+
+selectorVariance= VarianceThreshold()
+features = selectorVariance.fit_transform(features)
+testfeatures=testfeatures.drop(['feature_2'],axis=1)
+result =Run(features, labels, testfeatures)
 
 #export as csv file
 #loop that makes the id for the predicited valus
@@ -48,4 +56,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('MLPC3.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('RDMForC1.csv', columns=['Id', 'label'], index=False)
