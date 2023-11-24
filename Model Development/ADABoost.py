@@ -11,11 +11,11 @@ from sklearn.ensemble import RandomForestClassifier
 
 def Run(X,y,test):
     #make custom randomforest from whch the model starts
-    Randomforrest = RandomForestClassifier(random_state=211, n_estimators=100, criterion='entropy', min_samples_split=2)
+    Randomforrest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
     # split the data
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.33, random_state=42)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=100, random_state=test, learning_rate=1, algorithm='SAMME.R')
+    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
 
@@ -33,7 +33,7 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
 #basic pre prosessing
-#features.drop(inplace=True, labels= ['feature_15'], axis=1)
+#features.drop(inplace=True, labels= ['feature_13'], axis=1)
 
 
 

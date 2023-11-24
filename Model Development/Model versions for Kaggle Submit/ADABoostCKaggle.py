@@ -11,9 +11,9 @@ from sklearn.ensemble import RandomForestClassifier
 
 def Run(Xtrain,ytrain,Xtest):
     #make custom randomforest from whch the model starts
-    Randomforrest = RandomForestClassifier(random_state=211, n_estimators=100, criterion='entropy', min_samples_split=2)
+    Randomforrest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
 
-    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=100, random_state=5591, learning_rate=1, algorithm='SAMME.R')
+    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
 
@@ -38,11 +38,9 @@ testFeatures.drop(inplace=True, labels=['Id','feature_2'], axis=1)
 #convert to numpyarray
 features=features.to_numpy()
 labels=labels.to_numpy().flatten()
+testFeatures=testFeatures.to_numpy()
 
 #basic preprossesing
-selectorVariance= VarianceThreshold()
-features = selectorVariance.fit_transform(features)
-#for what ever reason this decraees the performance by arround 2.6%
 selectorVariance= VarianceThreshold()
 features = selectorVariance.fit_transform(features)
 
@@ -57,4 +55,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('ABC5.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('ABC6.csv', columns=['Id', 'label'], index=False)
