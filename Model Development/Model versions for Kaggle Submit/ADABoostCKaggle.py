@@ -13,7 +13,7 @@ def Run(Xtrain,ytrain,Xtest):
     #make custom randomforest from whch the model starts
     Randomforrest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
 
-    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
+    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=7, random_state=5591, learning_rate=0.9, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
 
@@ -55,4 +55,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('ABC6.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('ABC7.csv', columns=['Id', 'label'], index=False)
