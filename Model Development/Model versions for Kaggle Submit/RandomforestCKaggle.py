@@ -30,6 +30,10 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 testfeatures= testfeatures.drop(['Id'], axis=1)
 
+#remove potential garbage features
+features.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
+testfeatures.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
+
 
 
 
@@ -56,4 +60,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('RDMForC1.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('RDMForC2.csv', columns=['Id', 'label'], index=False)

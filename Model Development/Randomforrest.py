@@ -23,7 +23,7 @@ def Run(X,y):
     #make Prediction
     pred =randomforest.predict(Xtest)
 
-    score = f1_score(ytest, pred)
+    score = f1_score(ytest, pred, average='macro')
     return score
 
 #read csv
@@ -34,7 +34,7 @@ labels = pd.read_csv('train_label.csv')
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-
+features.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
 
 
 
