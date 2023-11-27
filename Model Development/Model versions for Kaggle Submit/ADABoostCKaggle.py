@@ -27,10 +27,12 @@ testFeatures =pd.read_csv('test_features.csv')
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-testFeatures.drop(inplace=True, labels=['Id','feature_2'], axis=1)
+testFeatures.drop(inplace=True, labels=['Id'], axis=1)
+#garbage feature removal
+features.drop(inplace=True, labels= ['feature_21','feature_0','feature_2'], axis=1)
+testFeatures.drop(inplace=True, labels= ['feature_21','feature_0','feature_2'], axis=1)
 
-#basic pre prosessing
-#features.drop(inplace=True, labels= ['feature_2',], axis=1)
+
 
 
 
@@ -55,4 +57,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('ABC7.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('ABC8.csv', columns=['Id', 'label'], index=False)

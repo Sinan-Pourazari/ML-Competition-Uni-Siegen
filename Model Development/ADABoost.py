@@ -1,21 +1,27 @@
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import f1_score
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import scale
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier,RandomForestClassifier
+from sklearn.tree import  DecisionTreeClassifier
 
 
 
 def Run(X,y,test):
+
     #make custom randomforest from whch the model starts
-    Randomforrest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
+    RDMForest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
+
     # split the data
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.24, random_state=211)
 
-    ABC= AdaBoostClassifier( estimator= Randomforrest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
+    # Kfold crossvalidation
+    kf = KFold(n_splits=5)
+    kf.get_n_splits()
+
+    ABC= AdaBoostClassifier( estimator= RDMForest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
 
@@ -32,8 +38,9 @@ labels = pd.read_csv('train_label.csv')
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
-#basic pre prosessing
-#features.drop(inplace=True, labels= ['feature_13'], axis=1)
+#Garbage feature removal
+features.drop(inplace=True, labels= ['feature_21','feature_0','feature_2'], axis=1)
+
 
 
 
