@@ -12,7 +12,7 @@ from sklearn.tree import  DecisionTreeClassifier
 def Run(X,y,test):
 
     #make custom randomforest from whch the model starts
-    RDMForest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='entropy', min_samples_split=10)
+    RDMForest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='log_loss', min_samples_split=10)
 
     # split the data
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.24, random_state=211)

@@ -34,7 +34,7 @@ labels = pd.read_csv('train_label.csv')
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-features.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
+features.drop(['feature_0', 'feature_21','feature_12'], axis=1, inplace=True)
 
 
 
