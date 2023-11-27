@@ -17,7 +17,7 @@ def Run(X,y):
     #Xtest = scale(Xtest)
 
     #build randomforrest
-    randomforest=RandomForestClassifier(random_state=211, n_estimators=100, criterion='entropy', min_samples_split=2)
+    randomforest=RandomForestClassifier(random_state=211, n_estimators=100, criterion='entropy', min_samples_split=10)
     randomforest.fit(Xtrain, ytrain)
 
     #make Prediction
@@ -34,13 +34,13 @@ labels = pd.read_csv('train_label.csv')
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-features.drop(['feature_0', 'feature_21', 'feature_5'], axis=1, inplace=True)
+features.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
 
 
 
 
 #convert to numpyarray
-features=features.to_numpy()
+#features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 #basic preprossesing
