@@ -15,15 +15,20 @@ def Run(X,y):
     #Xtest = scale(Xtest)
 
     #make model
-    MLP = MLPRegressor(random_state=211,max_iter=1000)
+    MLP = MLPRegressor(random_state=211,max_iter=2000, solver='adam', learning_rate='adaptive', learning_rate_init=0.004, verbose=True,
+                       n_iter_no_change=60,tol=1e-12)
 
 
 
 
     MLP.fit(Xtrain,ytrain)
     pred = MLP.predict(Xtest)
-    # calculate f1-score
+    # calculate RMSE
     score =np.sqrt(mean_squared_error(ytest, pred))
+    temp = pd.DataFrame({'Predicted': pred})
+
+    temp.to_csv('train pred', columns=['Predicted'], index=False)
+
     return score
 
 
@@ -42,10 +47,10 @@ features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 #basic preprossesing
-enc = OrdinalEncoder()
+#enc = OrdinalEncoder()
 
 #for what ever reason this decraees the performance by arround 2.6%
-selectorVariance= VarianceThreshold()
-features = selectorVariance.fit_transform(features)
+#selectorVariance= VarianceThreshold()
+#features = selectorVariance.fit_transform(features)
 
 print("RMSE: ", Run(features, labels))

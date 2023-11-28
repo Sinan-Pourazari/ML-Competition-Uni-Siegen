@@ -40,7 +40,7 @@ features.drop(['feature_0', 'feature_21'], axis=1, inplace=True)
 
 
 #convert to numpyarray
-#features=features.to_numpy()
+features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 #basic preprossesing
