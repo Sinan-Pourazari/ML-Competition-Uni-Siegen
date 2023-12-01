@@ -10,14 +10,15 @@ from sklearn.ensemble import RandomForestRegressor
 
 def Run(X,y):
     # split the data
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.33, random_state=42)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # scale
     #Xtrain = scale(Xtrain)
     #Xtest = scale(Xtest)
 
     #build randomforrest
-    randomforest=RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10)
+    randomforest=RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10,verbose=True, max_features=None, n_jobs=-1,
+                                       criterion='absolute_error')
     randomforest.fit(Xtrain, ytrain)
 
     #make Prediction
