@@ -17,8 +17,7 @@ def Run(X,y):
     #Xtest = scale(Xtest)
 
     #build randomforrest
-    randomforest=RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10,verbose=True, max_features=None, n_jobs=-1,
-                                       criterion='absolute_error')
+    randomforest=RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10,verbose=True, max_features=None, n_jobs=-1,criterion='friedman_mse')
     randomforest.fit(Xtrain, ytrain)
 
     #make Prediction

@@ -10,7 +10,9 @@ from sklearn.ensemble import RandomForestRegressor
 
 def Run(Xtrain,ytrain,Xtest):
     # build randomforrest
-    randomforest = RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10, verbose=True, max_features= None, n_jobs=-1)
+    randomforest = RandomForestRegressor(random_state=211, n_estimators=100, min_samples_split=10, verbose=True,
+                                         max_features=None, n_jobs=-1, criterion='friedman_mse')
+
     randomforest.fit(Xtrain, ytrain)
 
     # make Prediction
@@ -48,4 +50,4 @@ return_value=pd.DataFrame({'Id': idarr, 'Predicted': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('RDMForR1.csv', columns=['Id', 'Predicted'], index=False)
+return_value.to_csv('RDMForR2.csv', columns=['Id', 'Predicted'], index=False)
