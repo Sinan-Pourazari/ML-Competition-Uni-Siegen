@@ -5,11 +5,11 @@ from sklearn.preprocessing import scale
 import seaborn as sn
 
 
-data = pd.read_csv('train_features.csv')
-dataTarget = pd.read_csv('train_label.csv')
+data = pd.read_csv('test_features.csv')
+#dataTarget = pd.read_csv('train_features.csv')
 
 #Join Targets inot the dataframe in order to look for corelations between features and labels
-data=data.set_index('Id').join(dataTarget.set_index('Id'),rsuffix='Feat')
+#data=data.set_index('Id').join(dataTarget.set_index('Id'),rsuffix='Feat')
 
 print(data)
 #Read the features and their names into a normal array for easy acces via indexing
@@ -84,10 +84,10 @@ for i in range(2):
 
 #figure to further enhance/inspect 2 features (changed the features druing data exploration
 fig, big = plt.subplots()
-big.plot(feature_list[0], feature_list[29], color='g', label=feature_StringList[29])
+big.plot(feature_list[0], feature_list[4], color='g', label=feature_StringList[4])
 big.set(xlabel='id')
-big.plot(feature_list[0], feature_list[2], color='r', label=feature_StringList[2])
-big.plot(feature_list[0], feature_list[4], color='y', label=feature_StringList[4])
+#big.plot(feature_list[0], feature_list[2], color='r', label=feature_StringList[2])
+big.plot(feature_list[0], feature_list[19], color='y', label=feature_StringList[19])
 
 plt.legend()
 big.grid()

@@ -26,7 +26,7 @@ def Run(X,y):
     MLPC.fit(Xtrain,ytrain)
     pred = MLPC.predict(Xtest)
     # calculate f1-score
-    score = f1_score(ytest, pred)
+    score = f1_score(ytest, pred, average='macro')
     return score
 
 
