@@ -32,7 +32,7 @@ features.drop(columns=['timestamp_numeric','timestamp'],inplace=True, axis=1)
 
 features.rename({"timestamp_normalized": "timestamp"}, inplace=True, axis='columns')
 features['timestamp'] = features['timestamp'].astype(float)'''
-features['timestamp'] = round(features['timestamp'] / 86400000)
+features['timestamp'] = round(features['timestamp'] / 8640000000)
 features['timestamp'] = features['timestamp'].astype(int)
 print(features)
 # Merge features and labels based on 'item', 'user', and 'timestamp'
@@ -42,7 +42,7 @@ data = pd.merge(features, labels, on='Id')
 train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
 # Define the model
-embedding_size = 50
+embedding_size = 32
 
 user_input = tf.keras.layers.Input(shape=(1,), name='user_input')
 item_input = tf.keras.layers.Input(shape=(1,), name='item_input')
@@ -61,10 +61,10 @@ output = tf.keras.layers.Dense(1)(concatenated)
 model = tf.keras.models.Model(inputs=[user_input, item_input, timestamp_input], outputs=output)
 
 # Compile the model
-model.compile(optimizer='adam', loss='mean_squared_error')
+model.compile(optimizer='Adagrad', loss='mean_squared_error')
 
 # Train the model
-model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=10, batch_size=64, validation_split=0.2)
+model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=1000, batch_size=500, validation_split=0.2)
 
 # Make predictions
 test_predictions = model.predict([test_data['user'], test_data['item'], test_data['timestamp']])
