@@ -32,7 +32,7 @@ features.drop(columns=['timestamp_numeric','timestamp'],inplace=True, axis=1)
 
 features.rename({"timestamp_normalized": "timestamp"}, inplace=True, axis='columns')
 features['timestamp'] = features['timestamp'].astype(float)'''
-features['timestamp'] = round(features['timestamp'] / 8640000000)
+features['timestamp'] = round(features['timestamp'] / 86400000)
 features['timestamp'] = features['timestamp'].astype(int)
 print(features)
 # Merge features and labels based on 'item', 'user', and 'timestamp'
@@ -64,7 +64,7 @@ model = tf.keras.models.Model(inputs=[user_input, item_input, timestamp_input], 
 model.compile(optimizer='Adagrad', loss='mean_squared_error')
 
 # Train the model
-model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=1000, batch_size=500, validation_split=0.2)
+model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=1000, batch_size=1000, validation_split=0.2)
 
 # Make predictions
 test_predictions = model.predict([test_data['user'], test_data['item'], test_data['timestamp']])
@@ -72,3 +72,4 @@ test_predictions = model.predict([test_data['user'], test_data['item'], test_dat
 test_rmse = np.sqrt(mean_squared_error(test_data['rating'], test_predictions.flatten()))
 
 print(f'Test RMSE: {test_rmse}')
+#917, 500

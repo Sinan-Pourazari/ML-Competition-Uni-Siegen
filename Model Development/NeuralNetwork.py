@@ -18,7 +18,7 @@ def Run(X,y):
     MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.0041,
                          solver='sgd', learning_rate='adaptive', activation='relu',
                          shuffle= True, n_iter_no_change=3, momentum= 0.9, nesterovs_momentum= True,
-                         hidden_layer_sizes=(100,))
+                         hidden_layer_sizes=(100,), tol= 1e-4, verbose=True)
 
 
 
@@ -36,10 +36,11 @@ labels = pd.read_csv('train_label.csv')
 
 
 #drop the id
-features = features.drop(['Id'], axis=1)
+features = features.drop(['Id','feature_2' ,'feature_21', 'feature_0'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
 
+#0.76339703077671
 
 print(features)
 
@@ -51,7 +52,7 @@ labels=labels.to_numpy().flatten()
 #basic preprossesing
 
 #for what ever reason this decraees the performance by arround 2.6%
-selectorVariance= VarianceThreshold()
-features = selectorVariance.fit_transform(features)
+#selectorVariance= VarianceThreshold()
+#features = selectorVariance.fit_transform(features)
 
 print(Run(features, labels))
