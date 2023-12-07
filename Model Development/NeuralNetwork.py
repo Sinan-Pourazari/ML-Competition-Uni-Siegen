@@ -36,12 +36,12 @@ labels = pd.read_csv('train_label.csv')
 
 
 #drop the id
-features = features.drop(['Id','feature_2' ,'feature_21', 'feature_0'], axis=1)
+features = features.drop(['Id','feature_2' ,'feature_21', 'feature_9', 'feature_12'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
 
-#0.76339703077671
-
+#0.7591787866128608
+#7707335759433058 f9
 print(features)
 
 

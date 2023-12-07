@@ -26,9 +26,9 @@ labels = pd.read_csv('train_label.csv')
 predFeatures = pd.read_csv('test_features.csv')
 
 #drop the id
-features = features.drop(['Id','feature_2','feature_21','feature_0'], axis=1)
+features = features.drop(['Id','feature_2','feature_21','feature_9'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-predFeatures = predFeatures.drop(['Id', 'feature_2', 'feature_21', 'feature_0'], axis=1)
+predFeatures = predFeatures.drop(['Id', 'feature_2', 'feature_21', 'feature_9'], axis=1)
 
 #convert to numpyarray
 features=features.to_numpy()
@@ -48,4 +48,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('MLPC6.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('MLPC7.csv', columns=['Id', 'label'], index=False)
