@@ -31,8 +31,8 @@ labels = labels.drop(['Id'], axis=1)
 testfeatures= testfeatures.drop(['Id'], axis=1)
 
 #remove potential garbage features
-features.drop(['feature_0', 'feature_21','feature_5'], axis=1, inplace=True)
-testfeatures.drop(['feature_0', 'feature_21','feature_5'], axis=1, inplace=True)
+features.drop(['feature_9', 'feature_21','feature_2'], axis=1, inplace=True)
+testfeatures.drop(['feature_9', 'feature_21','feature_2'], axis=1, inplace=True)
 
 
 
@@ -47,7 +47,6 @@ testfeatures.to_numpy()
 
 selectorVariance= VarianceThreshold()
 features = selectorVariance.fit_transform(features)
-testfeatures=testfeatures.drop(['feature_2'],axis=1)
 result =Run(features, labels, testfeatures)
 
 #export as csv file
@@ -60,4 +59,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('RDMForC5.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('RDMForC6.csv', columns=['Id', 'label'], index=False)

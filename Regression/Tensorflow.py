@@ -64,7 +64,7 @@ model = tf.keras.models.Model(inputs=[user_input, item_input, timestamp_input], 
 model.compile(optimizer='Adagrad', loss='mean_squared_error')
 
 # Train the model
-model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=1000, batch_size=1000, validation_split=0.2)
+model.fit([train_data['user'], train_data['item'], train_data['timestamp']], train_data['rating'], epochs=1000, batch_size=10240, validation_split=0.2)
 
 # Make predictions
 test_predictions = model.predict([test_data['user'], test_data['item'], test_data['timestamp']])

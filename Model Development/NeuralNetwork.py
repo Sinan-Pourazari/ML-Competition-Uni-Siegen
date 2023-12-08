@@ -15,12 +15,12 @@ def Run(X,y):
     Xtest = scale(Xtest)
 
     #make model
-    MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.0041,
+    MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.00419,
                          solver='sgd', learning_rate='adaptive', activation='relu',
                          shuffle= True, n_iter_no_change=3, momentum= 0.9, nesterovs_momentum= True,
                          hidden_layer_sizes=(100,), tol= 1e-4, verbose=True)
 
-
+    #MLPC = MLPClassifier(random_state=211, max_iter=10000)
 
 
     MLPC.fit(Xtrain,ytrain)
@@ -36,7 +36,7 @@ labels = pd.read_csv('train_label.csv')
 
 
 #drop the id
-features = features.drop(['Id','feature_2' ,'feature_21', 'feature_9', 'feature_12'], axis=1)
+features = features.drop(['Id','feature_2' ,'feature_21'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
 

@@ -10,9 +10,7 @@ def Run(X,y):
     # split the data
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.20, random_state=42)
 
-    # scale
-    #Xtrain = scale(Xtrain)
-    #Xtest = scale(Xtest)
+
 
     #make model
     MLP = MLPRegressor(random_state=211,max_iter=2000, solver='adam', learning_rate='adaptive', learning_rate_init=0.004, verbose=True,
