@@ -6,6 +6,7 @@ from sklearn.preprocessing import scale
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.ensemble import AdaBoostClassifier,RandomForestClassifier
 from sklearn.tree import  DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
 
 
 
@@ -21,9 +22,13 @@ def Run(X,y,test):
     kf = KFold(n_splits=5)
     kf.get_n_splits()
 
-    ABC= AdaBoostClassifier( estimator= RDMForest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
+    ABC= AdaBoostClassifier( base_estimator= RDMForest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
+    #cross vaidation
+    scores = cross_val_score(ABC, Xtrain, ytrain, cv=10, scoring='f1_macro')
+    print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
+    print(scores)
 
     score = f1_score(ytest, pred, average='macro')
     return score
@@ -53,17 +58,7 @@ selectorVariance= VarianceThreshold()
 features = selectorVariance.fit_transform(features)
 
 ''' 
-#loop to try the imact of the randomstate on the model
-bestrdmscore=0
-bestrdm=0
-for i in range(10000):
-    temp=Run(features, labels, i)
-    print("f1-Score: ", temp, "randomstate: ",i)
-    if temp > bestrdmscore:
-        bestrdmscore=temp
-        bestrdm=i
-print("Best: ", bestrdmscore, " "," state: ",bestrdm)
-#Best:  0.7846610066214404    state:  5591
+
 '''
 print(Run(features, labels, 710))
 

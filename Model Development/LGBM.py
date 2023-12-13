@@ -20,20 +20,20 @@ def Run(features, labels):
     train_data = lgbm.Dataset(Xtrain, label=ytrain,    feature_name=feature_names, categorical_feature=['feature_10', 'feature_12'])
     print(train_data)
     #create validation set
-    validation_data = lgbm.Dataset(data=Xval, label= yval, reference=train_data, feature_name=feature_names, categorical_feature=['feature_10', 'feature_12'])
+    validation_data = lgbm.Dataset(data=Xval, label= yval, reference=train_data)
 
     #create validation set
     #validation_data = train_data.create_valid(features)
 
     #parameters of the model
-    param = {'num_leaves': 64, 'objective': 'binary', 'data_sample_strategy': 'bagging',
-             'learning_rate': 0.1, 'early_stoping_round': 1}
+    param = {'num_leaves': 32, 'objective': 'binary', 'data_sample_strategy': 'bagging',
+             'learning_rate': 0.1, 'early_stopping_round': 1}
     param['boosting_type'] = 'gbdt'
     param['metric'] = 'binary_logloss'
 
 
     #train model
-    model = lgbm.train(param, train_data, 100, valid_sets=[validation_data])
+    model = lgbm.train(param, train_data, 85, valid_sets=[validation_data])
 
     #save model
     model.save_model('LGBM_Model3.txt')
