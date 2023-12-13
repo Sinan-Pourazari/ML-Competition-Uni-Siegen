@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import scale
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.ensemble import AdaBoostClassifier,RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import  DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 
@@ -13,16 +13,18 @@ from sklearn.model_selection import cross_val_score
 def Run(X,y,test):
 
     #make custom randomforest from whch the model starts
-    RDMForest = RandomForestClassifier(random_state=211, n_estimators=50, criterion='log_loss', min_samples_split=10)
+    RDMForest = RandomForestClassifier(random_state=211, n_estimators=5, criterion='log_loss', min_samples_split=10, n_jobs=-1,
+                                       min_impurity_decrease= 0.0, verbose=True)
+    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True)
 
     # split the data
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.24, random_state=211)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=211)
 
     # Kfold crossvalidation
     kf = KFold(n_splits=5)
     kf.get_n_splits()
 
-    ABC= AdaBoostClassifier( base_estimator= RDMForest ,n_estimators=50, random_state=5591, learning_rate=1, algorithm='SAMME.R')
+    ABC= AdaBoostClassifier( estimator= GBmodel ,n_estimators=50, random_state=211, learning_rate=1, algorithm='SAMME.R')
     ABC.fit(Xtrain,ytrain)
     pred = ABC.predict(Xtest)
     #cross vaidation
@@ -44,7 +46,7 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 
 #Garbage feature removal
-features.drop(inplace=True, labels= ['feature_21','feature_0','feature_2'], axis=1)
+features.drop(inplace=True, labels= ['feature_2'], axis=1)
 
 
 
