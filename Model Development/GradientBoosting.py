@@ -28,7 +28,7 @@ def Run(X,y):
 
     #make Prediction
     #pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel3_wo_f14_f9_f1_upsampeled')
+    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel3_wo_f14_f9_f1_downsampeled')
    # score = f1_score(ytest, pred, average='macro')
     scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
     print(scores)
@@ -42,10 +42,10 @@ labels = pd.read_csv('train_label.csv')
 
 #resample to counter inbalance
 merged = pd.merge(features, labels, on='Id')
-minority = merged.loc[merged['label'] == 1]
-merged = merged[merged.label != 1]
+minority = merged.loc[merged['label'] == 0]
+merged = merged[merged.label != 0]
 print(merged)
-minority= resample(minority, n_samples=1000, random_state=42)
+minority= resample(minority, n_samples=539, random_state=42)
 print(minority)
 merged = pd.concat([merged, minority])
 print(merged)

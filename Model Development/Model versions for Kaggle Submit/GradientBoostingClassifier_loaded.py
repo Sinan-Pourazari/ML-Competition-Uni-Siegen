@@ -15,7 +15,7 @@ def Run(Xtrain,ytrain, Xtest):
     #Xtest = scale(Xtest)
 
     #define model parameters
-    GBmodel= load('GBmodel3_wo_f14_f9_f1_upsampeled')
+    GBmodel= load('GBmodel3_wo_f14_f9_f1_downsampeled')
 
 
     # split the data
@@ -62,4 +62,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC3.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC4.csv', columns=['Id', 'label'], index=False)
