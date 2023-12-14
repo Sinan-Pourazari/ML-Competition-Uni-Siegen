@@ -15,7 +15,7 @@ def Run(Xtrain,ytrain, Xtest):
     #Xtest = scale(Xtest)
 
     #define model parameters
-    GBmodel= load('GBmodel3_wo_f14_f9_f1_downsampeled')
+    GBmodel= load('GBmodel5_wo_f2_downsamp')
 
 
     # split the data
@@ -39,7 +39,7 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 test_features = test_features.drop(['Id'],axis=1)
 #drop features without information
-test_features = test_features.drop(['feature_2', 'feature_1', 'feature_9'],axis=1)
+test_features = test_features.drop(['feature_2'],axis=1)
 features = features.drop(['feature_2'],axis=1)
 
 
@@ -62,4 +62,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC4.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC5.csv', columns=['Id', 'label'], index=False)

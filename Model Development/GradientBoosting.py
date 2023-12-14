@@ -16,7 +16,8 @@ def Run(X,y):
     #scale(X)
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True)
+    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
+                                        loss='log_loss', criterion='friedman_mse')
 
 
     # split the data
@@ -24,11 +25,12 @@ def Run(X,y):
     scale(Xtrain)
     scale(Xtest)'''
     GBmodel.fit(X, y)
+    print(GBmodel.feature_importances_)
 
 
     #make Prediction
     #pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel3_wo_f14_f9_f1_downsampeled')
+    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel5_wo_f2_downsamp')
    # score = f1_score(ytest, pred, average='macro')
     scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
     print(scores)
@@ -45,7 +47,7 @@ merged = pd.merge(features, labels, on='Id')
 minority = merged.loc[merged['label'] == 0]
 merged = merged[merged.label != 0]
 print(merged)
-minority= resample(minority, n_samples=539, random_state=42)
+minority= resample(minority, n_samples=700, random_state=42)
 print(minority)
 merged = pd.concat([merged, minority])
 print(merged)
@@ -60,7 +62,7 @@ features = features.drop(['Id'], axis=1)
 
 #drop features without information
 #
-features.drop(['feature_2', 'feature_1', 'feature_9'], axis=1, inplace=True)
+features.drop(['feature_2'], axis=1, inplace=True)
 
 
 #convert to numpyarray
