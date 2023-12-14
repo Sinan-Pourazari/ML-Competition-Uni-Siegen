@@ -30,7 +30,7 @@ def Run(X,y):
 
     #make Prediction
     #pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel5_wo_f2_downsamp_upsamp')
+    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp')
    # score = f1_score(ytest, pred, average='macro')
     scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
     print(scores)
@@ -46,7 +46,7 @@ labels = pd.read_csv('train_label.csv')
 merged = pd.merge(features, labels, on='Id')
 minority = merged.loc[merged['label'] == 1]
 majority = merged.loc[merged['label']==0]
-minority = resample(minority, n_samples=700, random_state=42)
+#minority = resample(minority, n_samples=600, random_state=42)
 majority = resample(majority, n_samples=800, random_state=42)
 merged = pd.concat([majority, minority])
 labels =merged['label']
