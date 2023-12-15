@@ -22,7 +22,7 @@ def Run(X,y):
 
 
     # split the data
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
+    #Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=211)
     #scale(Xtrain)
     #scale(Xtest)
     GBmodel.fit(X, y)
@@ -30,9 +30,9 @@ def Run(X,y):
 
 
     #make Prediction
-    #pred =GBmodel.predict(testX)
+    #pred =GBmodel.predict(Xtest)
     dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_RepeatedEditedNearestNeigh')
-    #score = f1_score(pred, testy, average='macro')
+   # score = f1_score(ytest, pred, average='macro')
     scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
@@ -80,4 +80,4 @@ features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 
-print(Run(features, labels))
+print('validation score: ', Run(features, labels))
