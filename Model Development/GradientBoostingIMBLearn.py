@@ -8,7 +8,8 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import scale
 from joblib import dump, load
 from sklearn.utils import resample
-
+from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours
+from imblearn.combine import SMOTEENN
 def Run(X,y):
 
 
@@ -21,17 +22,17 @@ def Run(X,y):
 
 
     # split the data
-    ''' Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
-    scale(Xtrain)
-    scale(Xtest)'''
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
+    #scale(Xtrain)
+    #scale(Xtest)
     GBmodel.fit(X, y)
     print(GBmodel.feature_importances_)
 
 
     #make Prediction
-    #pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_upsamp_test')
-   # score = f1_score(ytest, pred, average='macro')
+    #pred =GBmodel.predict(testX)
+    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_RepeatedEditedNearestNeigh')
+    #score = f1_score(pred, testy, average='macro')
     scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
@@ -42,33 +43,41 @@ def Run(X,y):
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
 
-#resample to counter inbalance
-merged = pd.merge(features, labels, on='Id')
-minority = merged.loc[merged['label'] == 1]
-majority = merged.loc[merged['label']==0]
-print(minority)
-#minority = resample(minority, n_samples=600, random_state=42)
-majority = resample(majority, n_samples=800, random_state=42, replace= True)
-merged = pd.concat([majority, minority])
-labels =merged['label']
-merged.drop(['label'],inplace=True, axis=1)
-features=merged
-print(features)
+
 #drop the id
 features = features.drop(['Id'], axis=1)
-#labels = labels.drop(['Id'], axis=1)
+labels = labels.drop(['Id'], axis=1)
+
 
 #drop features without information
-#
+
 features.drop(['feature_2'], axis=1, inplace=True)
-print(labels)
+
+#resample using imbalanced learn
+#cluster removal
+
+'''cc = ClusterCentroids(random_state=42)
+features, labels = cc.fit_resample(features, labels)'''
+
+
+#up and down sampling SMOTEENN
+balance = {
+    1: 800
+}
+renn = RepeatedEditedNearestNeighbours(kind_sel='mode', n_neighbors=13)
+X, y = renn.fit_resample(features, labels)
+features =X
+labels = y
+print(features)
 print('1: ', labels.value_counts()[1])
 print('0: ', labels.value_counts()[0])
+
+#features, test_features, labels,test_labels = train_test_split(features,labels, test_size=0.1, random_state=211)
+
 
 #convert to numpyarray
 features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 
-
-print(Run(features,labels))
+print(Run(features, labels))
