@@ -5,42 +5,60 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import GradientBoostingClassifier
-
-def Run(Xtrain,ytrain, Xtest):
+from sklearn.preprocessing import scale
+from joblib import dump, load
+from sklearn.utils import resample
+from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold
+from imblearn.combine import SMOTEENN
+def Run(Xtrain,ytrain,Xtest):
 
 
     # scale
-    #Xtrain = scale(Xtrain)
-    #Xtest = scale(Xtest)
+    #scale(X)
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True)
+    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
+                                        loss='log_loss', criterion='friedman_mse')
 
-
-    # split the data
-
-    GBmodel.fit(Xtrain, ytrain)
-
+    GBmodel.fit(X, y)
 
     #make Prediction
     pred =GBmodel.predict(Xtest)
+    dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_InstanceHardnessThreshold_Kaggle1')
 
     return pred
-
 
 #read csv
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
-test_features =pd.read_csv('test_features.csv')
+test_features = pd.read_csv('test_features.csv')
 
 
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-test_features = test_features.drop(['Id'],axis=1)
+test_features.drop(['Id'], axis=1, inplace=True)
+
 #drop features without information
-test_features = test_features.drop(['feature_2'],axis=1)
-features = features.drop(['feature_2'],axis=1)
+
+features.drop(['feature_2'], axis=1, inplace=True)
+test_features.drop(['feature_2'], axis=1, inplace=True)
+#resample using imbalanced learn
+#cluster removal
+
+labels=labels.to_numpy().flatten()
+
+#up downsampling using InstanceHardnessThreshold
+
+iht = InstanceHardnessThreshold(sampling_strategy=0.7, random_state=42)
+X, y = iht.fit_resample(features, labels)
+features =X
+labels = y
+labels = pd.DataFrame(labels)
+
+print('1: ', labels.value_counts()[1])
+print('0: ', labels.value_counts()[0])
+
 
 
 #convert to numpyarray
@@ -48,9 +66,8 @@ features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 
-
-
-result = Run(features,labels, test_features)
+#print(Run(features, labels))
+result = Run(features, labels, test_features)
 
 #export as csv file
 #loop that makes the id for the predicited valus
@@ -62,4 +79,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC1.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC11.csv', columns=['Id', 'label'], index=False)

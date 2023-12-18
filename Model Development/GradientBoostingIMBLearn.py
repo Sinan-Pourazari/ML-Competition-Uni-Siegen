@@ -8,9 +8,9 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import scale
 from joblib import dump, load
 from sklearn.utils import resample
-from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours
+from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule
 from imblearn.combine import SMOTEENN
-def Run(X,y):
+def Run(Xtrain,ytrain,Xtest,ytest):
 
 
     # scale
@@ -30,14 +30,14 @@ def Run(X,y):
 
 
     #make Prediction
-    #pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_RepeatedEditedNearestNeigh')
-   # score = f1_score(ytest, pred, average='macro')
-    scores = cross_val_score(GBmodel, X, y, cv=10, scoring='f1_macro')
+    pred =GBmodel.predict(Xtest)
+   #1 dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_NearMiss')
+    score = f1_score(ytest, pred, average='macro')
+    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
 
-    #return score
+    return score
 
 #read csv
 features = pd.read_csv('train_features.csv')
@@ -58,21 +58,25 @@ features.drop(['feature_2'], axis=1, inplace=True)
 
 '''cc = ClusterCentroids(random_state=42)
 features, labels = cc.fit_resample(features, labels)'''
+labels=labels.to_numpy().flatten()
 
-
+features, test_features, labels ,test_labels = train_test_split(features,labels, test_size=0.1, random_state=246)
 #up and down sampling SMOTEENN
 balance = {
-    1: 800
+    1: 800,
+    0: 500
 }
-renn = RepeatedEditedNearestNeighbours(kind_sel='mode', n_neighbors=13)
-X, y = renn.fit_resample(features, labels)
+
+ncr = NeighbourhoodCleaningRule(kind_sel='mode', threshold_cleaning=0.99, n_neighbors=14, n_jobs=-1)
+X, y = ncr.fit_resample(features, labels)
 features =X
 labels = y
+labels = pd.DataFrame(labels)
+
 print(features)
 print('1: ', labels.value_counts()[1])
 print('0: ', labels.value_counts()[0])
 
-#features, test_features, labels,test_labels = train_test_split(features,labels, test_size=0.1, random_state=211)
 
 
 #convert to numpyarray
@@ -80,4 +84,5 @@ features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 
 
-print('validation score: ', Run(features, labels))
+#print(Run(features, labels))
+print('validation score: ', Run(features, labels, test_features, test_labels))

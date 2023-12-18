@@ -15,7 +15,7 @@ def Run(Xtrain,ytrain, Xtest):
     #Xtest = scale(Xtest)
 
     #define model parameters
-    GBmodel= load('GBmodel6_wo_f2_downsamp_IMBLearn_RepeatedEditedNearestNeigh')
+    GBmodel= load('GBmodel6_wo_f2_downsamp_IMBLearn_InstanceHardnessThreshold2')
 
 
     # split the data
@@ -62,4 +62,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC10.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC12.csv', columns=['Id', 'label'], index=False)
