@@ -8,7 +8,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import scale
 from joblib import dump, load
 from sklearn.utils import resample
-from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold
+from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NeighbourhoodCleaningRule
 from imblearn.combine import SMOTEENN
 def Run(Xtrain,ytrain,Xtest):
 
@@ -22,9 +22,11 @@ def Run(Xtrain,ytrain,Xtest):
 
     GBmodel.fit(X, y)
 
+    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    print(scores)
     #make Prediction
     pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_InstanceHardnessThreshold_Kaggle1')
+    dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_NeighbourhoodCleaningRule_Kaggle1')
 
     return pred
 
@@ -50,12 +52,11 @@ labels=labels.to_numpy().flatten()
 
 #up downsampling using InstanceHardnessThreshold
 
-iht = InstanceHardnessThreshold(sampling_strategy=0.7, random_state=42)
-X, y = iht.fit_resample(features, labels)
+ncr = NeighbourhoodCleaningRule(kind_sel='mode', threshold_cleaning=0.99, n_neighbors=14, n_jobs=-1)
+X, y = ncr.fit_resample(features, labels)
 features =X
 labels = y
 labels = pd.DataFrame(labels)
-
 print('1: ', labels.value_counts()[1])
 print('0: ', labels.value_counts()[0])
 
@@ -79,4 +80,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC11.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC12.csv', columns=['Id', 'label'], index=False)
