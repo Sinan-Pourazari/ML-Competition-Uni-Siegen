@@ -10,7 +10,7 @@ dataTarget = pd.read_csv('train_label.csv')
 
 #Join Targets inot the dataframe in order to look for corelations between features and labels
 data = pd.merge(data, dataTarget, on='Id')
-
+print(data['feature_20','label'])
 print(data)
 #Read the features and their names into a normal array for easy acces via indexing
 feature_list = []

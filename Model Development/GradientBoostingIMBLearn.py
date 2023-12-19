@@ -3,12 +3,12 @@ from sklearn.metrics import f1_score
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, LeaveOneOut
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import scale
 from joblib import dump, load
 from sklearn.utils import resample
-from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule
+from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule, OneSidedSelection
 from imblearn.combine import SMOTEENN
 def Run(Xtrain,ytrain,Xtest,ytest):
 
@@ -33,7 +33,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     pred =GBmodel.predict(Xtest)
    #1 dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_NearMiss')
     score = f1_score(ytest, pred, average='macro')
-    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=10, scoring='f1_macro')
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
 
@@ -61,14 +61,14 @@ features, labels = cc.fit_resample(features, labels)'''
 labels=labels.to_numpy().flatten()
 
 features, test_features, labels ,test_labels = train_test_split(features,labels, test_size=0.1, random_state=246)
-#up and down sampling SMOTEENN
+#up and down sampling
 balance = {
     1: 800,
     0: 500
 }
 
-ncr = NeighbourhoodCleaningRule(kind_sel='mode', threshold_cleaning=0.99, n_neighbors=14, n_jobs=-1)
-X, y = ncr.fit_resample(features, labels)
+oss = OneSidedSelection( random_state=42, n_neighbors=7, n_jobs=-1, n_seeds_S=1)
+X, y = oss.fit_resample(features, labels)
 features =X
 labels = y
 labels = pd.DataFrame(labels)
