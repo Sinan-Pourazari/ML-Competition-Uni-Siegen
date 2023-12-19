@@ -1,3 +1,4 @@
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import numpy as np
@@ -20,13 +21,13 @@ def Run(Xtrain,ytrain,Xtest):
     GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
                                         loss='log_loss', criterion='friedman_mse')
 
-    GBmodel.fit(X, y)
+    GBmodel.fit(Xtrain, ytrain)
 
     scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
     print(scores)
     #make Prediction
     pred =GBmodel.predict(Xtest)
-    dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_NeighbourhoodCleaningRule_Kaggle1')
+    #dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_NeighbourhoodCleaningRule_Kaggle1')
 
     return pred
 
@@ -41,32 +42,17 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 test_features.drop(['Id'], axis=1, inplace=True)
 
-#drop features without information
-
-features.drop(['feature_2'], axis=1, inplace=True)
-test_features.drop(['feature_2'], axis=1, inplace=True)
-#resample using imbalanced learn
-#cluster removal
-
-labels=labels.to_numpy().flatten()
-
-#up downsampling using InstanceHardnessThreshold
-
-ncr = NeighbourhoodCleaningRule(kind_sel='mode', threshold_cleaning=0.99, n_neighbors=14, n_jobs=-1)
-X, y = ncr.fit_resample(features, labels)
-features =X
-labels = y
-labels = pd.DataFrame(labels)
-print('1: ', labels.value_counts()[1])
-print('0: ', labels.value_counts()[0])
-
-
+#feature selection
+feature_names = features.columns.to_numpy().flatten()
+SKB=SelectKBest(mutual_info_classif, k=28)
+SKB.feature_names_in_=feature_names
+features = SKB.fit_transform(features,labels)
+test_features = SKB.transform(test_features)
 
 #convert to numpyarray
-features=features.to_numpy()
+#features=features.to_numpy()
 labels=labels.to_numpy().flatten()
-
-
+print(labels)
 #print(Run(features, labels))
 result = Run(features, labels, test_features)
 
@@ -80,4 +66,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC12.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC14.csv', columns=['Id', 'label'], index=False)

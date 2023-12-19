@@ -76,7 +76,7 @@ labels=labels.to_numpy().flatten()
 
 #feature selection
 feature_names = features.columns.to_numpy().flatten()
-SKB=SelectKBest(mutual_info_classif, k=26)
+SKB=SelectKBest(mutual_info_classif, k=28)
 SKB.feature_names_in_=feature_names
 features = SKB.fit_transform(features,labels)
 
