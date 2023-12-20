@@ -1,3 +1,4 @@
+from imblearn.over_sampling import SVMSMOTE
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -42,18 +43,20 @@ features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 test_features.drop(['Id'], axis=1, inplace=True)
 
-#feature selection
-feature_names = features.columns.to_numpy().flatten()
-SKB=SelectKBest(mutual_info_classif, k=28)
-SKB.feature_names_in_=feature_names
-features = SKB.fit_transform(features,labels)
-test_features = SKB.transform(test_features)
+#upsample the minority class
+svms = SVMSMOTE(random_state=42, out_step=0.4, k_neighbors=5, m_neighbors=10, sampling_strategy=0.8)
+X_res, y_res = svms.fit_resample(features, labels)
+features =X_res
+labels = y_res
+labels = pd.DataFrame(labels)
+
+print('1: ', labels.value_counts()[1])
+print('0: ', labels.value_counts()[0])
 
 #convert to numpyarray
 #features=features.to_numpy()
 labels=labels.to_numpy().flatten()
 print(labels)
-#print(Run(features, labels))
 result = Run(features, labels, test_features)
 
 #export as csv file
@@ -66,4 +69,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC14.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC16.csv', columns=['Id', 'label'], index=False)
