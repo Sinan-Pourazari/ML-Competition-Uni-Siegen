@@ -14,7 +14,7 @@ from sklearn.utils.class_weight import compute_sample_weight
 def Run(Xtrain,ytrain,Xtest,ytest):
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=250,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
+    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
                                         loss='log_loss', criterion='friedman_mse')
 
 
@@ -22,7 +22,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
 
     for i in range(len(weights)):
         if(weights[i]>1):
-            weights[i] = weights[i]*3
+            weights[i] = weights[i]*2
     print(weights)
     GBmodel.fit(Xtrain, ytrain, weights)
     print(GBmodel.get_params())
@@ -53,7 +53,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
 
-features.drop(['Id'], axis=1, inplace=True)
+features.drop(['Id','feature_2', 'feature_14'], axis=1, inplace=True)
 labels.drop(['Id'], axis=1, inplace=True)
 
 #feature selection

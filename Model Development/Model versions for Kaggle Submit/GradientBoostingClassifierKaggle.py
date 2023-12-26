@@ -43,9 +43,9 @@ test_features = pd.read_csv('test_features.csv')
 
 
 #drop the id
-features = features.drop(['Id', 'feature_2', 'feature_11', 'feature_14', 'feature_26'], axis=1)
+features = features.drop(['Id', 'feature_2'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-test_features.drop(['Id', 'feature_2', 'feature_11', 'feature_14', 'feature_26'], axis=1, inplace=True)
+test_features.drop(['Id', 'feature_2'], axis=1, inplace=True)
 
 
 
@@ -68,4 +68,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC24.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC28.csv', columns=['Id', 'label'], index=False)
