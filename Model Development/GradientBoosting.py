@@ -22,7 +22,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
 
     for i in range(len(weights)):
         if(weights[i]>1):
-            weights[i] = weights[i]*2
+            weights[i] = weights[i]*3
     print(weights)
     GBmodel.fit(Xtrain, ytrain, weights)
     print(GBmodel.get_params())
