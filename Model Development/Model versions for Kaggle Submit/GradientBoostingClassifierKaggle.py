@@ -25,6 +25,8 @@ def Run(Xtrain,ytrain,Xtest):
     for i in range(len(weights)):
         if(weights[i]>1):
             weights[i] = weights[i]*2
+        else:
+            weights[i] = weights[i]/2
 
     GBmodel.fit(Xtrain, ytrain, weights)
 
@@ -73,4 +75,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC19.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC20.csv', columns=['Id', 'label'], index=False)
