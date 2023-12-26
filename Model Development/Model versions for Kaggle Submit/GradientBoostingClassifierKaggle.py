@@ -47,12 +47,7 @@ features = features.drop(['Id', 'feature_2'], axis=1)
 labels = labels.drop(['Id'], axis=1)
 test_features.drop(['Id', 'feature_2'], axis=1, inplace=True)
 
-'''#upsample the minority class
-bsm = BorderlineSMOTE(random_state=42)
-X_res, y_res = bsm.fit_resample(features, labels)
-features =X_res
-labels = y_res
-labels = pd.DataFrame(labels)'''
+
 
 print('1: ', labels.value_counts()[1])
 print('0: ', labels.value_counts()[0])
@@ -73,4 +68,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC21.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC23.csv', columns=['Id', 'label'], index=False)
