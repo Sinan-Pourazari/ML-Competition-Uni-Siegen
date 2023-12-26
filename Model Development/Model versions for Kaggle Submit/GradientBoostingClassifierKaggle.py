@@ -22,6 +22,9 @@ def Run(Xtrain,ytrain,Xtest):
     GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
                                         loss='log_loss', criterion='friedman_mse')
     weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
+    for i in range(len(weights)):
+        if(weights[i]>1):
+            weights[i] = weights[i]*2
 
     GBmodel.fit(Xtrain, ytrain, weights)
 
@@ -70,4 +73,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC18.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC19.csv', columns=['Id', 'label'], index=False)
