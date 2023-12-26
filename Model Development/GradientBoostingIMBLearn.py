@@ -10,7 +10,7 @@ from joblib import dump, load
 from sklearn.utils import resample
 from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule, OneSidedSelection
 from imblearn.combine import SMOTEENN
-from imblearn.over_sampling import RandomOverSampler, SMOTENC,ADASYN,SVMSMOTE
+from imblearn.over_sampling import RandomOverSampler, SMOTENC,ADASYN,SVMSMOTE,KMeansSMOTE,BorderlineSMOTE
 def Run(Xtrain,ytrain,Xtest,ytest):
 
 
@@ -63,11 +63,11 @@ features.drop(['feature_2'], axis=1, inplace=True)
 features, labels = cc.fit_resample(features, labels)'''
 labels=labels.to_numpy().flatten()
 
-features, test_features, labels ,test_labels = train_test_split(features,labels, test_size=0.2, random_state=179)
+features, test_features, labels ,test_labels = train_test_split(features,labels, test_size=0.2, random_state=213)
 #up and down sampling
 
-svms = SVMSMOTE(random_state=42, out_step=0.4, k_neighbors=5, m_neighbors=10)
-X_res, y_res = svms.fit_resample(features, labels)
+bsm = BorderlineSMOTE(random_state=42)
+X_res, y_res = bsm.fit_resample(features, labels)
 features =X_res
 labels = y_res
 labels = pd.DataFrame(labels)

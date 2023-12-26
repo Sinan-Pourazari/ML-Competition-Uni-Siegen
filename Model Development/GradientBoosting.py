@@ -10,16 +10,23 @@ from joblib import dump, load
 from sklearn.utils import resample
 from sklearn.inspection import permutation_importance
 from sklearn.feature_selection import SelectKBest, f_classif,mutual_info_classif
+from sklearn.utils.class_weight import compute_sample_weight
 def Run(Xtrain,ytrain,Xtest,ytest):
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
+    GBmodel= GradientBoostingClassifier(n_estimators=250,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
                                         loss='log_loss', criterion='friedman_mse')
 
 
+    weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
 
-    GBmodel.fit(Xtrain, ytrain)
-    print(ytest)
+    for i in range(len(weights)):
+        if(weights[i]>1):
+            weights[i] = weights[i]*2
+    print(weights)
+    GBmodel.fit(Xtrain, ytrain, weights)
+    print(GBmodel.get_params())
+
 
     print(GBmodel.feature_importances_)
     result = permutation_importance(GBmodel, Xtrain, ytrain, n_repeats=10, random_state = 0)
@@ -49,9 +56,17 @@ labels = pd.read_csv('train_label.csv')
 features.drop(['Id'], axis=1, inplace=True)
 labels.drop(['Id'], axis=1, inplace=True)
 
+#feature selection
+'''feature_names = features.columns.to_numpy().flatten()
+SKB=SelectKBest(mutual_info_classif, k='all')
+SKB.feature_names_in_=feature_names
+features = SKB.fit_transform(features,labels)
+
+print(SelectKBest.get_feature_names_out(SKB))'''
+
 
 #train test split before resampling to get "pure" test data
-Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.3, random_state=42)
+Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.1, random_state=7521, stratify=labels)
 
 '''#resample to counter inbalance
 #merge labels to the corosponding sampels
@@ -92,16 +107,11 @@ ytrain.drop(['Id'], axis=1, inplace=True)'''
 
 
 #convert to numpyarray
-Xtrain=Xtrain.to_numpy()
+#Xtrain=Xtrain.to_numpy()
 ytrain=ytrain.to_numpy().flatten()
 ytest = ytest.to_numpy().flatten()
-Xtest = Xtest.to_numpy()
-'''#feature selection
-feature_names = features.columns.to_numpy().flatten()
-SKB=SelectKBest(mutual_info_classif, k=28)
-SKB.feature_names_in_=feature_names
-features = SKB.fit_transform(features,labels)'''
+#Xtest = Xtest.to_numpy()
 
-#print(SelectKBest.get_feature_names_out(SKB))
+
 
 print(Run(Xtrain,ytrain,Xtest,ytest))

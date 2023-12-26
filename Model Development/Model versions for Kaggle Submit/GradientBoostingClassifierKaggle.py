@@ -1,4 +1,4 @@
-from imblearn.over_sampling import SVMSMOTE
+from imblearn.over_sampling import SVMSMOTE, BorderlineSMOTE
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import scale
 from joblib import dump, load
-from sklearn.utils import resample
+from sklearn.utils import resample, compute_sample_weight
 from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NeighbourhoodCleaningRule
 from imblearn.combine import SMOTEENN
 def Run(Xtrain,ytrain,Xtest):
@@ -21,8 +21,9 @@ def Run(Xtrain,ytrain,Xtest):
     #define model parameters
     GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
                                         loss='log_loss', criterion='friedman_mse')
+    weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
 
-    GBmodel.fit(Xtrain, ytrain)
+    GBmodel.fit(Xtrain, ytrain, weights)
 
     scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
     print(scores)
@@ -39,16 +40,16 @@ test_features = pd.read_csv('test_features.csv')
 
 
 #drop the id
-features = features.drop(['Id'], axis=1)
+features = features.drop(['Id', 'feature_2'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-test_features.drop(['Id'], axis=1, inplace=True)
+test_features.drop(['Id', 'feature_2'], axis=1, inplace=True)
 
-#upsample the minority class
-svms = SVMSMOTE(random_state=42, out_step=0.4, k_neighbors=5, m_neighbors=10, sampling_strategy=0.8)
-X_res, y_res = svms.fit_resample(features, labels)
+'''#upsample the minority class
+bsm = BorderlineSMOTE(random_state=42)
+X_res, y_res = bsm.fit_resample(features, labels)
 features =X_res
 labels = y_res
-labels = pd.DataFrame(labels)
+labels = pd.DataFrame(labels)'''
 
 print('1: ', labels.value_counts()[1])
 print('0: ', labels.value_counts()[0])
@@ -69,4 +70,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC16.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC18.csv', columns=['Id', 'label'], index=False)
