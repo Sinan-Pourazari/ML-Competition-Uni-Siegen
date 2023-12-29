@@ -23,6 +23,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     for i in range(len(weights)):
         if(weights[i]>1):
             weights[i] = weights[i]*2
+
     print(weights)
     GBmodel.fit(Xtrain, ytrain, weights)
     print(GBmodel.get_params())
@@ -34,7 +35,18 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     print(result.importances_std)
     #make Prediction
 
-    pred =GBmodel.predict(Xtest)
+    pred_prob =GBmodel.predict_proba(Xtest)
+    #print(type(pred))
+    pred_temp = np.empty(len(pred_prob))
+    for i in range(len(pred_prob)):
+       pred_temp[i] =  float(pred_prob[i][1])
+
+    pred = pred_temp
+    for i in range(len(pred)):
+        if pred[i]>=0.72:
+            pred[i]=1
+        else:
+            pred[i]=0
     #dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_f20')
     score = f1_score(ytest, pred, average='macro')
     temp = pd.DataFrame({'Test': ytest, 'Pred': pred})
@@ -43,17 +55,17 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     tn, fp, fn, tp = confusion_matrix(ytest, pred).ravel()
     print('tn: ', tn, 'tp: ', tp, 'fn: ', fn, 'fp: ', fp)
 
-    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    '''scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
-
+'''
     return score
 
 #read csv
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
 
-features.drop(['Id','feature_2', 'feature_14'], axis=1, inplace=True)
+features.drop(['Id','feature_2'], axis=1, inplace=True)
 labels.drop(['Id'], axis=1, inplace=True)
 
 #feature selection
@@ -66,7 +78,7 @@ print(SelectKBest.get_feature_names_out(SKB))'''
 
 
 #train test split before resampling to get "pure" test data
-Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.1, random_state=7521, stratify=labels)
+Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.1, random_state=26881)
 
 '''#resample to counter inbalance
 #merge labels to the corosponding sampels

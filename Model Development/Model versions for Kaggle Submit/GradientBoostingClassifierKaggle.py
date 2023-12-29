@@ -19,7 +19,7 @@ def Run(Xtrain,ytrain,Xtest):
     #scale(X)
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=250,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
+    GBmodel= GradientBoostingClassifier(n_estimators=200,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
                                         loss='log_loss', criterion='friedman_mse')
     weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
     for i in range(len(weights)):
@@ -28,10 +28,24 @@ def Run(Xtrain,ytrain,Xtest):
 
     GBmodel.fit(Xtrain, ytrain, weights)
 
-    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
-    print(scores)
+    pred_prob = GBmodel.predict_proba(Xtest)
+    # print(type(pred))
+    pred_temp = np.empty(len(pred_prob))
+    for i in range(len(pred_prob)):
+        pred_temp[i] = float(pred_prob[i][1])
+    # 0.8126126126126126
+
+    pred = pred_temp
+    for i in range(len(pred)):
+        if pred[i] >= 0.73:
+            pred[i] = 1
+        else:
+            pred[i] = 0
+
+    ''' scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    print(scores)'''
     #make Prediction
-    pred =GBmodel.predict(Xtest)
+
     #dump(GBmodel, 'GBmodel6_wo_f2_downsamp_IMBLearn_NeighbourhoodCleaningRule_Kaggle1')
 
     return pred
@@ -68,4 +82,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('GBC28.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('GBC32.csv', columns=['Id', 'label'], index=False)
