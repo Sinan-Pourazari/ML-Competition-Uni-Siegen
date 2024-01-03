@@ -14,8 +14,8 @@ from sklearn.utils.class_weight import compute_sample_weight
 def Run(Xtrain,ytrain,Xtest,ytest):
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
-                                        loss='log_loss', criterion='friedman_mse')
+    GBmodel= GradientBoostingClassifier(n_estimators=1074,learning_rate=0.01,max_depth=74, random_state=42,verbose=True,
+                                        loss='exponential', criterion='squared_error', max_features=None, min_samples_leaf=4, min_samples_split=34 )
 
 
     weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
@@ -25,7 +25,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
             weights[i] = weights[i]*2
 
     print(weights)
-    GBmodel.fit(Xtrain, ytrain, weights)
+    GBmodel.fit(Xtrain, ytrain,weights)
     print(GBmodel.get_params())
 
 
@@ -35,18 +35,9 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     print(result.importances_std)
     #make Prediction
 
-    pred_prob =GBmodel.predict_proba(Xtest)
-    #print(type(pred))
-    pred_temp = np.empty(len(pred_prob))
-    for i in range(len(pred_prob)):
-       pred_temp[i] =  float(pred_prob[i][1])
+    pred = GBmodel.predict(Xtest)
 
-    pred = pred_temp
-    for i in range(len(pred)):
-        if pred[i]>=0.72:
-            pred[i]=1
-        else:
-            pred[i]=0
+
     #dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_f20')
     score = f1_score(ytest, pred, average='macro')
     temp = pd.DataFrame({'Test': ytest, 'Pred': pred})
@@ -55,10 +46,9 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     tn, fp, fn, tp = confusion_matrix(ytest, pred).ravel()
     print('tn: ', tn, 'tp: ', tp, 'fn: ', fn, 'fp: ', fp)
 
-    '''scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro', n_jobs=-1)
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
-'''
     return score
 
 #read csv
