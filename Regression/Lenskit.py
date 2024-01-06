@@ -13,7 +13,8 @@ def eval(aname, algo, train, test):
     users = test.user.unique()
 
     #run recomender
-    recs = batch.recommend(fittable, users, 100)
+
+    recs= fittable.recommend(users,n=1)
     recs['Algorithm'] = aname
 
     return recs
@@ -30,6 +31,7 @@ data = data.drop(['Id'], axis=1)
 
 algo_ii = knn.ItemItem(20)
 algo_als = als.BiasedMF(50)
+
 
 all_recs= []
 test_data =[]
