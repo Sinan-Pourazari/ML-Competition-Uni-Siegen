@@ -20,7 +20,6 @@ def Run(train, test):
     for i in range(len(users)):
         temp = fittable.recommend(users[i], n=1)
         recs.append(temp['item'])
-        fittable.predict()
 
     ret = pd.DataFrame(recs)
     ret.columns = ['label']
