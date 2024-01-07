@@ -2,7 +2,7 @@ import lenskit
 from lenskit.datasets import ML100K
 from lenskit import batch, topn, util
 from lenskit import crossfold as xf
-from lenskit.algorithms import Recommender, als, item_knn as knn
+from lenskit.algorithms import Recommender, als, item_knn as knn, svd
 from lenskit import topn
 from lenskit.metrics.predict import rmse
 import pandas as pd
@@ -53,13 +53,15 @@ data.drop_duplicates(keep='first', inplace=True)
 
 
 algo_ii = knn.ItemItem(20)
-algo_als = als.BiasedMF(50)
+algo_als = als.BiasedMF(50, iterations=30, reg= 0.2, damping= 4, bias= True)
+algo_svd = svd.BiasedSVD(200, damping=2, bias=True)
+
 
 if __name__ == '__main__':
 
 
     #result = eval( algo_ii, data, test)
-    result=eval( algo_als, data, test)
+    result=eval( algo_svd, data, test)
 
     idarr = np.array([])
     for i in range(len(result)):
@@ -69,7 +71,7 @@ if __name__ == '__main__':
     return_value = return_value.astype(int)
     print(return_value)
     # save it as file
-    return_value.to_csv('Lenskit_BiasedMF2.csv', columns=['Id', 'Predicted'], index=False)
+    return_value.to_csv('Lenskit_BiasedSVD2.csv', columns=['Id', 'Predicted'], index=False)
 
 
 

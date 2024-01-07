@@ -2,7 +2,7 @@ import lenskit
 from lenskit.datasets import ML100K
 from lenskit import batch, topn, util
 from lenskit import crossfold as xf
-from lenskit.algorithms import Recommender, als, item_knn as knn
+from lenskit.algorithms import Recommender, als, item_knn as knn, svd
 from lenskit import topn
 from lenskit.metrics.predict import rmse
 import pandas as pd
@@ -51,7 +51,7 @@ data.drop_duplicates(keep='first', inplace=True)
 labels = data['rating']
 features = data.drop(['rating'], axis=1)
 
-train, test = train_test_split(data, test_size= 0.33, random_state= 532)
+train, test = train_test_split(data, test_size= 0.1, random_state= 532)
 
 
 #drop the id
@@ -65,10 +65,13 @@ test_feature = test.drop(['rating'], axis=1, inplace = False)
 #basic algorithms
 algo_ii = knn.ItemItem(20)
 algo_als = als.BiasedMF(50)
+algo_svd = svd.BiasedSVD(200, damping=2, bias=True)
+
 
 if __name__ == '__main__':
     #result = eval( algo_ii, data, test)
-    result=eval( algo_als, data, test_feature)
+
+    result=eval( algo_svd, data, test_feature)
     print(np.sqrt(mean_squared_error(test_label, result)))
 
 
