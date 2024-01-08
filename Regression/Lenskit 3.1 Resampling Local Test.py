@@ -1,17 +1,15 @@
+from collections import Counter
+
 import lenskit
 from lenskit.datasets import ML100K
 from lenskit import batch, topn, util
 from lenskit import crossfold as xf
 from lenskit.algorithms import Recommender, als, item_knn as knn, svd
-from lenskit import topn
-from lenskit.metrics.predict import rmse
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-
-from collections import Counter
-
+from imblearn.over_sampling import RandomOverSampler
 
 def eval(algo, train, test):
     fittable = util.clone(algo)
@@ -45,16 +43,30 @@ labels = pd.read_csv('train_label.csv')
 
 #megre to remove all duplicates
 data = pd.merge(features, labels, on='Id')
-data = data[data['timestamp']>= 1300000000000]
 
 #drop duplicate rows
 data.drop_duplicates(keep='first', inplace=True)
-#split it for the train test split
-labels = data['rating']
-features = data.drop(['rating'], axis=1)
+
 
 train, test = train_test_split(data, test_size= 0.1, random_state= 532)
 
+#split it for resampling
+labels = train['rating']
+features = train.drop(['rating'], axis=1)
+
+#resample to combat imbalance
+dist = {
+    4: 400000,
+    3: 300000,
+    2: 300000,
+    1: 350000,
+}
+ros = RandomOverSampler(random_state=42, sampling_strategy=dist)
+
+xtrain, ytrain = ros.fit_resample(features, labels)
+print(Counter(ytrain))
+xtrain.join(ytrain)
+train=xtrain
 
 #drop the id
 train.drop(['Id'], axis=1, inplace=True)
@@ -67,7 +79,7 @@ test_feature = test.drop(['rating'], axis=1, inplace = False)
 #basic algorithms
 algo_ii = knn.ItemItem(20)
 algo_als = als.BiasedMF(50)
-algo_svd = svd.BiasedSVD(100, damping=5, bias=True)
+algo_svd = svd.BiasedSVD(50, damping=5, bias=True)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,11 @@ def eval(algo, train, test):
     fittable.fit(train)
     users = test.user.array
     items = test.item.array
-
+    #get ratings for NaN replacement
+    ratings = train.rating.array
+    print(type(ratings))
+    average_rating = np.bincount(ratings).argmax()
+    print(average_rating)
     # now we run the recommender
     #recs = batch.recommend(fittable, users, 100)
     recs=[]
@@ -25,12 +29,13 @@ def eval(algo, train, test):
     pred = []
     i=0
     for j in items:
-        print(i, j)
         pred.append(recs[i][j])
         i=i+1
+    #remove NaN and repalce with 5 due to the bias
+    pred = np.nan_to_num(pred,copy=True, nan=round(average_rating))
+
 
     ret = [round(x) for x in pred]
-    print(ret)
     return ret
 
 
@@ -48,6 +53,7 @@ data = pd.merge(features, labels, on='Id')
 data = data.drop(['Id'], axis=1)
 test.drop(['Id'], axis=1, inplace=True)
 #drop duplicate rows
+data = data[data['timestamp']>= 1350000000000]
 
 data.drop_duplicates(keep='first', inplace=True)
 
@@ -71,7 +77,7 @@ if __name__ == '__main__':
     return_value = return_value.astype(int)
     print(return_value)
     # save it as file
-    return_value.to_csv('Lenskit_BiasedSVD2.csv', columns=['Id', 'Predicted'], index=False)
+    return_value.to_csv('Lenskit_BiasedSVD3.csv', columns=['Id', 'Predicted'], index=False)
 
 
 
