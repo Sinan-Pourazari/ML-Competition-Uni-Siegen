@@ -53,21 +53,21 @@ data = pd.merge(features, labels, on='Id')
 data = data.drop(['Id'], axis=1)
 test.drop(['Id'], axis=1, inplace=True)
 #drop duplicate rows
-data = data[data['timestamp']>= 1350000000000]
+data = data[data['timestamp']>= 1448838000000]
 
 data.drop_duplicates(keep='first', inplace=True)
 
 
 algo_ii = knn.ItemItem(20)
-algo_als = als.BiasedMF(50, iterations=30, reg= 0.2, damping= 4, bias= True)
-algo_svd = svd.BiasedSVD(200, damping=2, bias=True)
+algo_als = als.BiasedMF(features=100, iterations=160, reg=0.15, damping=5, bias=True, method='cd')
+algo_svd = svd.BiasedSVD(100, damping=2, bias=True)
 
 
 if __name__ == '__main__':
 
 
     #result = eval( algo_ii, data, test)
-    result=eval( algo_svd, data, test)
+    result=eval( algo_als, data, test)
 
     idarr = np.array([])
     for i in range(len(result)):
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     return_value = return_value.astype(int)
     print(return_value)
     # save it as file
-    return_value.to_csv('Lenskit_BiasedSVD3.csv', columns=['Id', 'Predicted'], index=False)
+    return_value.to_csv('Lenskit_BiasedMF3.csv', columns=['Id', 'Predicted'], index=False)
 
 
 

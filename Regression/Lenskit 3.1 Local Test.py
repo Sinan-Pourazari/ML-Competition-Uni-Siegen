@@ -53,7 +53,7 @@ data.drop_duplicates(keep='first', inplace=True)
 labels = data['rating']
 features = data.drop(['rating'], axis=1)
 
-train, test = train_test_split(data, test_size= 0.1, random_state= 532)
+train, test = train_test_split(data, test_size= 0.3, random_state= 2001931634)
 
 
 #drop the id
@@ -66,13 +66,13 @@ test_feature = test.drop(['rating'], axis=1, inplace = False)
 
 #basic algorithms
 algo_ii = knn.ItemItem(20)
-algo_als = als.BiasedMF(50)
+algo_als = als.BiasedMF(features=100, iterations=160, reg=0.15, damping=5, bias=True, method='lu')
 algo_svd = svd.BiasedSVD(100, damping=5, bias=True)
 
 
 if __name__ == '__main__':
     #result = eval( algo_ii, data, test)
-    result=eval( algo_svd, data, test_feature)
+    result=eval( algo_als, data, test_feature)
     print(np.sqrt(mean_squared_error(test_label, result)))
 
 

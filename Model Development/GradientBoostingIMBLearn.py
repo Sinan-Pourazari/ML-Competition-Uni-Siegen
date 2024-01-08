@@ -10,24 +10,17 @@ from joblib import dump, load
 from sklearn.utils import resample
 from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule, OneSidedSelection
 from imblearn.combine import SMOTEENN
-from imblearn.over_sampling import RandomOverSampler, SMOTENC,ADASYN,SVMSMOTE,KMeansSMOTE,BorderlineSMOTE
+from imblearn.over_sampling import RandomOverSampler, SMOTENC,ADASYN,SVMSMOTE,KMeansSMOTE,BorderlineSMOTE, SMOTE
 def Run(Xtrain,ytrain,Xtest,ytest):
 
-
-    # scale
-    #scale(X)
-
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
-                                        loss='log_loss', criterion='friedman_mse')
-
+    GBmodel = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10, random_state=211,
+                                         verbose=True,
+                                         loss='log_loss', criterion='friedman_mse', max_features=None,
+                                         min_samples_leaf=4, min_samples_split=34)
 
     # split the data
-    #Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.1, random_state=211)
-    #scale(Xtrain)
-    #scale(Xtest)
     GBmodel.fit(Xtrain, ytrain)
-    print(GBmodel.feature_importances_)
 
 
     #make Prediction
@@ -36,7 +29,7 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     print('tn: ', tn, 'tp: ', tp, 'fn: ', fn, 'fp: ', fp)
     #1 dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_NearMiss')
     score = f1_score(ytest, pred, average='macro')
-    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro')
+    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro', n_jobs=-1)
     print(scores)
     print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
 
@@ -57,17 +50,13 @@ labels = labels.drop(['Id'], axis=1)
 features.drop(['feature_2'], axis=1, inplace=True)
 
 #resample using imbalanced learn
-#cluster removal
-
-'''cc = ClusterCentroids(random_state=42)
-features, labels = cc.fit_resample(features, labels)'''
 labels=labels.to_numpy().flatten()
 
 features, test_features, labels ,test_labels = train_test_split(features,labels, test_size=0.2, random_state=213)
 #up and down sampling
 
-bsm = BorderlineSMOTE(random_state=42)
-X_res, y_res = bsm.fit_resample(features, labels)
+smo = SMOTE(random_state=42, n_jobs=-1)
+X_res, y_res = smo.fit_resample(features, labels)
 features =X_res
 labels = y_res
 labels = pd.DataFrame(labels)
