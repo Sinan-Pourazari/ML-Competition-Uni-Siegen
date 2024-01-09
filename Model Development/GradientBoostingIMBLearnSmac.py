@@ -43,24 +43,24 @@ labels=labels.to_numpy().flatten()
 
 #up and down sampling
 
-smo = SMOTE(random_state=42)
+'''smo = SMOTE(random_state=42)
 X_res, y_res = smo.fit_resample(features, labels)
 features =X_res
 labels = y_res
-labels = pd.DataFrame(labels)
+labels = pd.DataFrame(labels)'''
 
 #convert to numpyarray
 features=features.to_numpy()
-labels=labels.to_numpy().flatten()
+#labels=labels.to_numpy().flatten()
 
 def train(config: Configuration, seed: int) -> float:
-    model = GradientBoostingClassifier(n_estimators=config["n_estimators"],learning_rate=config["learning_rate"],max_depth=config["max_depth"], random_state=config["random_state"],verbose=False,
+    model = GradientBoostingClassifier(n_estimators=config["n_estimators"],learning_rate=config["learning_rate"],max_depth=config["max_depth"], random_state=seed,verbose=False,
                                         loss=config["loss"], criterion=config["criterion"], min_samples_split= config["min_samples_split"], min_samples_leaf = config["min_samples_leaf"], min_weight_fraction_leaf=config["min_weight_fraction_leaf"])
     model.fit(features, labels)
 
     scores = cross_val_score(model, features, labels, cv=3, n_jobs=-1)
 
-    return 1- scores.mean()
+    return 1- np.mean(scores)
 
 configspace = ConfigurationSpace({"n_estimators" : (10, 300),
                                   "learning_rate" : (0.05, 0.4),
