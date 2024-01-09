@@ -66,7 +66,7 @@ test_feature = test.drop(['rating'], axis=1, inplace = False)
 
 #basic algorithms
 algo_ii = knn.ItemItem(20)
-algo_als = als.BiasedMF(features=100, iterations=160, reg=0.15, damping=5, bias=True, method='lu')
+algo_als = als.BiasedMF(features=100, iterations=30, reg=0.15, damping=10, bias=True, method='lu')
 algo_svd = svd.BiasedSVD(100, damping=5, bias=True)
 
 

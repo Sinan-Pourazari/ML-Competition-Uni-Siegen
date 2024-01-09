@@ -8,10 +8,10 @@ from imblearn.over_sampling import SMOTE
 def Run(Xtrain,ytrain,Xtest):
 
     #define model parameters
-    GBmodel = GradientBoostingClassifier(n_estimators=150, learning_rate=0.1, max_depth=10, random_state=211,
-                                         verbose=True,
-                                         loss='log_loss', criterion='friedman_mse', max_features=None,
-                                         min_samples_leaf=4, min_samples_split=34)
+    GBmodel = GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
+                                        loss='log_loss', criterion='friedman_mse')
+
+
 
     # split the data
     GBmodel.fit(Xtrain, ytrain)
@@ -62,4 +62,4 @@ return_value = pd.DataFrame({'Id': idarr, 'Predicted': result})
 return_value = return_value.astype(int)
 print(return_value)
 # save it as file
-return_value.to_csv('GBC39.csv', columns=['Id', 'Predicted'], index=False)
+return_value.to_csv('GBC41.csv', columns=['Id', 'Predicted'], index=False)
