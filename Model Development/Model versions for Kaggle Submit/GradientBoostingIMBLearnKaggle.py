@@ -8,10 +8,9 @@ from imblearn.over_sampling import SMOTE
 def Run(Xtrain,ytrain,Xtest):
 
     #define model parameters
-    GBmodel = GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
-                                        loss='log_loss', criterion='friedman_mse')
-
-
+    GBmodel = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10, random_state=211,
+                                         verbose=True,
+                                         loss='log_loss', criterion='friedman_mse')
 
     # split the data
     GBmodel.fit(Xtrain, ytrain)
@@ -31,10 +30,10 @@ test = pd.read_csv('test_features.csv')
 #drop the id
 features = features.drop(['Id'], axis=1)
 labels = labels.drop(['Id'], axis=1)
-test.drop(['Id', 'feature_2'], axis=1, inplace=True )
+test.drop(['Id', 'feature_2','feature_13', 'feature_28'], axis=1, inplace=True )
 
 #drop features without information
-features.drop(['feature_2'], axis=1, inplace=True)
+features.drop(['feature_2', 'feature_13', 'feature_28'], axis=1, inplace=True)
 
 #resample using imbalanced learn
 labels=labels.to_numpy().flatten()
@@ -62,4 +61,4 @@ return_value = pd.DataFrame({'Id': idarr, 'Predicted': result})
 return_value = return_value.astype(int)
 print(return_value)
 # save it as file
-return_value.to_csv('GBC41.csv', columns=['Id', 'Predicted'], index=False)
+return_value.to_csv('GBC46.csv', columns=['Id', 'Predicted'], index=False)

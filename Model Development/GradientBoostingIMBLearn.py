@@ -11,12 +11,13 @@ from sklearn.utils import resample
 from imblearn.under_sampling import ClusterCentroids,CondensedNearestNeighbour, EditedNearestNeighbours, RepeatedEditedNearestNeighbours,AllKNN, InstanceHardnessThreshold, NearMiss, NeighbourhoodCleaningRule, OneSidedSelection
 from imblearn.combine import SMOTEENN
 from imblearn.over_sampling import RandomOverSampler, SMOTENC,ADASYN,SVMSMOTE,KMeansSMOTE,BorderlineSMOTE, SMOTE
+import itertools
 def Run(Xtrain,ytrain):
 
     #define model parameters
-    GBmodel = GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=True,
-                                        loss='log_loss', criterion='friedman_mse')
-
+    GBmodel = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10, random_state=211,
+                                         verbose=False,
+                                         loss='log_loss', criterion='friedman_mse')
     # split the data
     GBmodel.fit(Xtrain, ytrain)
 
@@ -54,10 +55,18 @@ features =X_res
 labels = y_res
 labels = pd.DataFrame(labels)
 
-#convert to numpyarray
-features=features.to_numpy()
-labels=labels.to_numpy().flatten()
+labels = labels.to_numpy().flatten()
 
+low_imp_feat = ['feature_1', 'feature_4', 'feature_8', 'feature_13', 'feature_14', 'feature_21', 'feature_28']
+# Get combinations of all lengths
+all_combinations = []
+for r in range(1, len(low_imp_feat) + 1):
+    all_combinations.extend(itertools.combinations(low_imp_feat, r))
 
-#print(Run(features, labels))
-Run(features, labels)
+# Print the combinations
+for comb in all_combinations:
+    # convert to numpyarray
+    print('features droped: ', list(comb))
+    tempX = features.drop(list(comb), axis=1)
+    tempX = tempX.to_numpy()
+    Run(tempX, labels)
