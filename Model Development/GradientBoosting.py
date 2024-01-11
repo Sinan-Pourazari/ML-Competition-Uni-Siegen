@@ -14,9 +14,9 @@ from sklearn.utils.class_weight import compute_sample_weight
 def Run(Xtrain,ytrain,Xtest,ytest):
 
     #define model parameters
-    GBmodel= GradientBoostingClassifier(n_estimators=1074,learning_rate=0.01,max_depth=74, random_state=42,verbose=True,
-                                        loss='exponential', criterion='squared_error', max_features=None, min_samples_leaf=4, min_samples_split=34 )
-
+    GBmodel= GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=10, random_state=211,
+                                         verbose=True,
+                                         loss='log_loss', criterion='friedman_mse')
 
     weights = compute_sample_weight(class_weight='balanced' ,y=ytrain)
 

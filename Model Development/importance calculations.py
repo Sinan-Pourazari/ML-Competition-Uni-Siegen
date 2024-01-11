@@ -1,3 +1,4 @@
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, confusion_matrix
 import numpy as np
@@ -21,8 +22,7 @@ def Run(Xtrain,ytrain,Xtest,ytest, feature_names):
     GBmodel.fit(Xtrain,ytrain)
 
     per_imp = permutation_importance(GBmodel, Xtest, ytest,
-    n_repeats = 30,
-    random_state = 0)
+    n_repeats = 10000,random_state = 0, n_jobs=-1, )
     print('#### PERMUTATION IMPORTANCE ####')
     for i in per_imp.importances_mean.argsort()[::-1]:
 
@@ -32,9 +32,6 @@ def Run(Xtrain,ytrain,Xtest,ytest, feature_names):
 
     print('#### FEATURE IMPORTANCE ####')
     print(GBmodel.feature_importances_)
-    result = permutation_importance(GBmodel, Xtrain, ytrain, n_repeats=10, random_state = 0)
-    print(result.importances_mean)
-    print(result.importances_std)
     #make Prediction
 
     pred = GBmodel.predict(Xtest)
@@ -64,17 +61,21 @@ labels.drop(['Id'], axis=1, inplace=True)
 
 
 #train test split before resampling to get "pure" test data
-Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.1, random_state=26881)
+features, Xtest,labels, ytest = train_test_split(features, labels, test_size=0.2, random_state=26881)
 
 
 #drop features without information
 #labels.drop(['Id'], axis=1, inplace=True)
-
+smo = SMOTE(random_state=42, n_jobs=-1)
+X_res, y_res = smo.fit_resample(features, labels)
+features =X_res
+labels = y_res
+labels = pd.DataFrame(labels)
 
 
 #convert to numpyarray
-Xtrain=Xtrain.to_numpy()
-ytrain=ytrain.to_numpy().flatten()
+Xtrain=features.to_numpy()
+ytrain=labels.to_numpy().flatten()
 ytest = ytest.to_numpy().flatten()
 Xtest = Xtest.to_numpy()
 
