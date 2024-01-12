@@ -22,7 +22,7 @@ def Run(Xtrain,ytrain,Xtest,ytest, feature_names):
     GBmodel.fit(Xtrain,ytrain)
 
     per_imp = permutation_importance(GBmodel, Xtest, ytest,
-    n_repeats = 10000,random_state = 0, n_jobs=-1, )
+    n_repeats = 20000,random_state = 0, n_jobs=-1, )
     print('#### PERMUTATION IMPORTANCE ####')
     for i in per_imp.importances_mean.argsort()[::-1]:
 
