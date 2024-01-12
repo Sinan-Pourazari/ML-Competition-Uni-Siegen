@@ -66,11 +66,6 @@ features, Xtest,labels, ytest = train_test_split(features, labels, test_size=0.2
 
 #drop features without information
 #labels.drop(['Id'], axis=1, inplace=True)
-smo = SMOTE(random_state=42, n_jobs=-1)
-X_res, y_res = smo.fit_resample(features, labels)
-features =X_res
-labels = y_res
-labels = pd.DataFrame(labels)
 
 
 #convert to numpyarray

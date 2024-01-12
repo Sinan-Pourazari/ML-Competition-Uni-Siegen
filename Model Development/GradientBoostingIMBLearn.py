@@ -35,6 +35,5 @@ labels = labels.drop(['Id'], axis=1)
 features.drop(['feature_2','feature_20', 'feature_12'], axis=1, inplace=True)
 
 features, labels = removeOutlier(features, labels)
-
 if __name__ == '__main__':
     Run(features, labels)
