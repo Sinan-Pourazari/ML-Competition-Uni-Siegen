@@ -7,10 +7,9 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import f1_score
 from itertools import permutations
 from warnings import warn
-
+from progress.bar import Bar
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
-           'sequential_feature_selector'
-    , 'permutation_tester']
+           'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator']
 
 
 # needs pandas dataframe to work
@@ -162,3 +161,56 @@ def read_data(feature_path='train_features.csv', label_path='train_label.csv'):
     features = pd.read_csv(feature_path)
     labels = pd.read_csv(label_path)
     return features, labels
+
+def sequential_feature_eliminator(X, y, model, verbose=False):
+    warn(
+        'The method sequentail_feature_eliminator needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
+        'which uses multiple workers')
+    # number of features
+    n_features = len(X.columns)
+
+    # list with all (remaining) feature names
+    names = list(X.columns)
+
+    # this list collects the sequentialy best selected features
+    selected_features = list(X.columns)
+
+    # variables to remember best overall selection
+    overall_best_features = []
+    overall_best_score = 0
+    with Bar('Loading', fill='@', suffix='%(percent).1f%% - %(eta)ds') as bar:
+        # this loop is used to ge the next best feature
+        for i in range(n_features-1):
+            curr_best_score = 0
+            curr_worst_feature = ''
+
+            # this loop takes the so far selected features and tries all other features on it to select the next best one
+            for j in range(len(names)):
+                '#take current selected features and not yet selected feature to try'
+                curr_feature_list = selected_features.copy()
+                curr_feature_list.remove(names[j])
+                temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
+                if curr_best_score < temp_score:
+                    curr_best_score = temp_score
+                    curr_worst_feature = names[j]
+
+                    if overall_best_score < temp_score:
+                        overall_best_features = curr_feature_list
+                        overall_best_score = temp_score
+            '# remove next worst feature'
+            selected_features.remove(curr_worst_feature)
+
+            '#remove removed feature so it doesnt get removed multiple times resulting in an error'
+            names.remove(curr_worst_feature)
+
+            if verbose == True:
+                print('Score reached: ', curr_best_score, 'using: ', selected_features)
+
+            bar.next()
+
+        if verbose == True:
+            print('best Selection: ', overall_best_features, 'with score: ', overall_best_score)
+
+    return overall_best_features
+
+

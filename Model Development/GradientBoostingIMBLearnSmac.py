@@ -36,7 +36,7 @@ labels = labels.drop(['Id'], axis=1)
 
 #drop features without information
 
-features.drop(['feature_2'], axis=1, inplace=True)
+#features.drop(['feature_2'], axis=1, inplace=True)
 
 #resample using imbalanced learn
 labels=labels.to_numpy().flatten()
@@ -50,15 +50,15 @@ labels = y_res
 labels = pd.DataFrame(labels)'''
 
 #convert to numpyarray
-features=features.to_numpy()
+#features=features.to_numpy()
 #labels=labels.to_numpy().flatten()
 
 def train(config: Configuration, seed: int) -> float:
     model = GradientBoostingClassifier(n_estimators=config["n_estimators"],learning_rate=config["learning_rate"],max_depth=config["max_depth"], random_state=seed,verbose=False,
                                         loss=config["loss"], criterion=config["criterion"], min_samples_split= config["min_samples_split"], min_samples_leaf = config["min_samples_leaf"], min_weight_fraction_leaf=config["min_weight_fraction_leaf"])
-    model.fit(features, labels)
+    model.fit(features['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13', 'feature_25', 'feature_9', 'feature_6', 'feature_4', 'feature_14', 'feature_28', 'feature_15', 'feature_26'], labels)
 
-    scores = cross_val_score(model, features, labels, cv=3, n_jobs=-1)
+    scores = cross_val_score(model, features['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13', 'feature_25', 'feature_9', 'feature_6', 'feature_4', 'feature_14', 'feature_28', 'feature_15', 'feature_26'], labels, cv=3, n_jobs=-1)
 
     return 1- np.mean(scores)
 
