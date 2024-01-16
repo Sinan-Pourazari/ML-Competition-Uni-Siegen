@@ -9,7 +9,7 @@ def Run(Xtrain,ytrain):
                                          verbose=False,
                                          loss='log_loss', criterion='friedman_mse')
     # split the data
-    selected = sequential_feature_eliminator(Xtrain, ytrain, GBmodel, verbose=True)
+    selected = sequential_feature_selector(Xtrain, ytrain, GBmodel, verbose=True, remove_outlier=True)
     GBmodel.fit(Xtrain, ytrain.to_numpy().flatten())
 
     print(selected)

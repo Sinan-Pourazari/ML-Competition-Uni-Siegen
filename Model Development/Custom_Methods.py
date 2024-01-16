@@ -8,6 +8,8 @@ from sklearn.metrics import f1_score
 from itertools import permutations
 from warnings import warn
 from progress.bar import Bar
+from tqdm.auto import tqdm
+
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
            'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator']
 
@@ -69,7 +71,7 @@ def stratified_cross_fold_validator(X, y, folds, model, num_workers=10):
 
 def removeOutlier(X, y):
     # outlier detection
-    lof = LocalOutlierFactor(n_neighbors=51)
+    lof = LocalOutlierFactor(n_neighbors=20)
     outliers = lof.fit_predict(X)
 
     # convert -1 to 0 for boolean indexing
@@ -86,10 +88,12 @@ def removeOutlier(X, y):
 
 
 # needs Pandas dataframe to work
-def sequential_feature_selector(X, y, model, verbose=False):
+def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = False):
     warn(
         'The method sequentail_feature_selector needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
+    if remove_outlier:
+        X, y = removeOutlier(X,y)
     # number of features
     n_features = len(X.columns)
 
@@ -102,6 +106,10 @@ def sequential_feature_selector(X, y, model, verbose=False):
     # variables to remember best overall selection
     overall_best_features = []
     overall_best_score = 0
+
+    #initilize the progressbar
+    progress_bar = tqdm(total=n_features - 1, position=0, desc="Sequential Feature Selector",leave=True)
+
 
     # this loop is used to ge the next best feature
     for i in range(n_features):
@@ -127,10 +135,13 @@ def sequential_feature_selector(X, y, model, verbose=False):
         '#remove seltected feature so it doesnt get selected multiple times'
         names.remove(curr_best_feature)
         if verbose == True:
-            print('Score reached: ', curr_best_score, 'using: ', selected_features)
+            tqdm.write(f'Score reached:  {curr_best_score} using: {selected_features}')
+
+            #update the progressbar
+            progress_bar.update(1)
 
     if verbose == True:
-        print('best Selection: ', overall_best_features, 'with score: ', overall_best_score)
+        tqdm.write(f'Best Selection: {overall_best_features} with score: {overall_best_score}')
 
     return overall_best_features
 
@@ -143,7 +154,9 @@ def permutation_tester(X, y, model, verbose=False):
     names = list(X.columns)
     best_score = 0
     best_order = ''
-    for perm in permutations(names):
+    perms = permutations(names)
+    progress_bar = tqdm(total=len(list(perms)), position=0, desc="Sequential Feature Selector",leave=True)
+    for perm in permutations(perms):
         perm = list(perm)
         temp = np.mean(stratified_cross_fold_validator(X[perm], y, 5, model))
         if best_score < temp:
@@ -151,6 +164,7 @@ def permutation_tester(X, y, model, verbose=False):
             best_order = perm
             if verbose == True:
                 print('new best order: ', best_order, 'with score: ', best_score)
+                progress_bar.update(1)
     return best_order
 
 
@@ -162,10 +176,12 @@ def read_data(feature_path='train_features.csv', label_path='train_label.csv'):
     labels = pd.read_csv(label_path)
     return features, labels
 
-def sequential_feature_eliminator(X, y, model, verbose=False):
+def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =False):
     warn(
         'The method sequentail_feature_eliminator needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
+    if remove_outlier:
+        X, y =removeOutlier(X,y)
     # number of features
     n_features = len(X.columns)
 
@@ -175,41 +191,47 @@ def sequential_feature_eliminator(X, y, model, verbose=False):
     # this list collects the sequentialy best selected features
     selected_features = list(X.columns)
 
+    # initialize the tqdm progress bar with position=0
+    progress_bar = tqdm(total=n_features - 1, position=0, desc="Sequential Feature Elimination")
+
     # variables to remember best overall selection
     overall_best_features = []
     overall_best_score = 0
-    with Bar('Loading', fill='@', suffix='%(percent).1f%% - %(eta)ds') as bar:
-        # this loop is used to ge the next best feature
-        for i in range(n_features-1):
-            curr_best_score = 0
-            curr_worst_feature = ''
 
-            # this loop takes the so far selected features and tries all other features on it to select the next best one
-            for j in range(len(names)):
-                '#take current selected features and not yet selected feature to try'
-                curr_feature_list = selected_features.copy()
-                curr_feature_list.remove(names[j])
-                temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
-                if curr_best_score < temp_score:
-                    curr_best_score = temp_score
-                    curr_worst_feature = names[j]
+    for i in range(len(X.columns)):
+        print(i)
+        curr_best_score = 0
+        curr_worst_feature = ''
 
-                    if overall_best_score < temp_score:
-                        overall_best_features = curr_feature_list
-                        overall_best_score = temp_score
-            '# remove next worst feature'
-            selected_features.remove(curr_worst_feature)
+        # this loop takes the so far selected features and tries all other features on it to select the next best one
+        for j in range(len(names)):
+            # take current selected features and not yet selected feature to try
+            curr_feature_list = selected_features.copy()
+            curr_feature_list.remove(names[j])
+            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
 
-            '#remove removed feature so it doesnt get removed multiple times resulting in an error'
-            names.remove(curr_worst_feature)
+            if curr_best_score < temp_score:
+                curr_best_score = temp_score
+                curr_worst_feature = names[j]
 
-            if verbose == True:
-                print('Score reached: ', curr_best_score, 'using: ', selected_features)
+                if overall_best_score < temp_score:
+                    overall_best_features = curr_feature_list
+                    overall_best_score = temp_score
 
-            bar.next()
+        # remove the next worst feature
+        selected_features.remove(curr_worst_feature)
 
-        if verbose == True:
-            print('best Selection: ', overall_best_features, 'with score: ', overall_best_score)
+        # remove the removed feature so it doesn't get removed multiple times resulting in an error
+        names.remove(curr_worst_feature)
+
+        if verbose:
+            tqdm.write(f'Score reached: {curr_best_score} using: {selected_features}')
+
+            # update the tqdm progress bar
+            progress_bar.update(1)
+
+    if verbose:
+        tqdm.write(f'Best Selection: {overall_best_features} with score: {overall_best_score}')
 
     return overall_best_features
 
