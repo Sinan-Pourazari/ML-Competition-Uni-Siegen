@@ -9,8 +9,7 @@ def Run(Xtrain, ytrain, Xtest):
     # Xtest = scale(Xtest)
     # Xtrain = scale(Xtrain)
 
-    train_data = lgbm.Dataset(Xtrain, label=ytrain, feature_name=feature_names,
-                              categorical_feature=['feature_10', 'feature_12'])
+    train_data = lgbm.Dataset(Xtrain, label=ytrain, feature_name=feature_names)
     print(train_data)
     # create validation set
 
@@ -24,10 +23,10 @@ def Run(Xtrain, ytrain, Xtest):
     param['metric'] = 'binary_logloss'
 
     # train model
-    model = lgbm.train(param, train_data, 23)
+    model = lgbm.train(param, train_data, 36)
 
     # save model
-    model.save_model('LGBM_Model3.txt')
+    model.save_model('LGBM_Model4.txt')
 
     # make predictions
     ypred = model.predict(Xtest)
@@ -52,6 +51,7 @@ Xtest.drop(['Id'], axis=1, inplace=True)
 
 # drop some more stuff
 # X.drop(['feature_2'], axis=1, inplace=True)
+
 result = Run(X, y, Xtest)
 
 #export as csv file
@@ -64,4 +64,4 @@ return_value=pd.DataFrame({'Id': idarr, 'label': result})
 return_value=return_value.astype(int)
 print(return_value)
 #save it as file
-return_value.to_csv('LGBM3.csv', columns=['Id', 'label'], index=False)
+return_value.to_csv('LGBM4.csv', columns=['Id', 'label'], index=False)

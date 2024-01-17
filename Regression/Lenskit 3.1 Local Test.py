@@ -72,7 +72,7 @@ algo_svd = svd.BiasedSVD(100, damping=5, bias=True)
 
 if __name__ == '__main__':
     #result = eval( algo_ii, data, test)
-    result=eval( algo_als, data, test_feature)
+    result=eval( algo_als, train, test_feature)
     print(np.sqrt(mean_squared_error(test_label, result)))
 
 

@@ -7,9 +7,8 @@ from lightgbm import LGBMClassifier
 
 def Run(features, labels):
     feature_names = list(features)
-    print(feature_names)
-    Xtrain, Xtest, ytrain, ytest = train_test_split(features,labels, train_size=0.2, random_state=42)
-    Xtrain, Xval, ytrain, yval = train_test_split(X, y, random_state=17, test_size=0.1)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(features,labels, train_size=0.3, random_state=42)
+    Xtrain, Xval, ytrain, yval = train_test_split(X, y, random_state=17, test_size=0.5)
 
     print(Xtrain)
     #Xtest = scale(Xtest)
@@ -17,7 +16,7 @@ def Run(features, labels):
 
     ytest = ytest.to_numpy().flatten()
 
-    train_data = lgbm.Dataset(Xtrain, label=ytrain,    feature_name=feature_names, categorical_feature=['feature_10', 'feature_12'])
+    train_data = lgbm.Dataset(Xtrain, label=ytrain,    feature_name=feature_names)
     print(train_data)
     #create validation set
     validation_data = lgbm.Dataset(data=Xval, label= yval, reference=train_data)
@@ -27,7 +26,7 @@ def Run(features, labels):
 
     #parameters of the model
     param = {'num_leaves': 32, 'objective': 'binary', 'data_sample_strategy': 'bagging',
-             'learning_rate': 0.1, 'early_stopping_round': 1}
+             'learning_rate': 0.1, 'early_stopping_round': 20}
     param['boosting_type'] = 'gbdt'
     param['metric'] = 'binary_logloss'
 
