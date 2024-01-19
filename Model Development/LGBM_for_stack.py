@@ -5,24 +5,15 @@ from sklearn.metrics import f1_score
 from sklearn.preprocessing import scale
 from lightgbm import LGBMClassifier
 
-def Run(features, labels):
-    feature_names = list(features)
-    print(feature_names)
-    Xtrain, Xtest, ytrain, ytest = train_test_split(features,labels, train_size=0.3, random_state=311)
+def fit(Xtrain, ytrain):
+    feature_names = list(Xtrain)
 
-    Xtrain, Xval, ytrain, yval = train_test_split(Xtrain, ytrain, random_state=121357, test_size=0.2)
-
-    print(Xtrain)
     #Xtest = scale(Xtest)
     #Xtrain = scale(Xtrain)
 
-    ytest = ytest.to_numpy().flatten()
+    ytran = ytrain.to_numpy().flatten()
 
     train_data = lgbm.Dataset(Xtrain, label=ytrain,    feature_name=feature_names)
-    print(train_data)
-    #create validation set
-    validation_data = lgbm.Dataset(data=Xval, label= yval, reference=train_data)
-
     #create validation set
     #validation_data = train_data.create_valid(features)
 
@@ -34,23 +25,17 @@ def Run(features, labels):
 
 
     #train model
-    model = lgbm.train(param, train_data, 1000, valid_sets=[validation_data])
+    model = lgbm.train(param, train_data, 100)
 
-    #save model
-    model.save_model('LGBM_Model3.txt')
+    return model
 
-    #make predictions
-    ypred = model.predict(Xtest)
+'''def predict(X):
+    ypred = model.predict(X)
 
     # rounding the values
     ypred = ypred.round(0)
     # converting from float to integer
-    ypred = ypred.astype(int)
-
-    #calculate f1 macro score
-    score = f1_score(ytest,ypred, average='macro')
-    return score
-
+    ypred = ypred.astype(int)'''
 
 
 #Load the data
@@ -67,5 +52,4 @@ y.drop(['Id'], axis=1, inplace=True)
 
 #drop some more stuff
 #X.drop(['feature_2'], axis=1, inplace=True)
-print(Run(X,y))
 

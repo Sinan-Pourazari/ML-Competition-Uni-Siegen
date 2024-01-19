@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import LocalOutlierFactor
 from multiprocessing import Pool
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import f1_score
 from itertools import permutations
@@ -11,7 +11,8 @@ from progress.bar import Bar
 from tqdm.auto import tqdm
 
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
-           'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator']
+           'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator', 'stratified_cross_fold_validator_for_smote_single',
+           'cross_fold_validator']
 
 
 # needs pandas dataframe to work
@@ -56,6 +57,24 @@ def stratified_cross_fold_validator_for_smote(X, y, folds, model, num_workers=10
 
     return np.array(scores, dtype=np.float32)
 
+def stratified_cross_fold_validator_for_smote_single(X, y, folds, model):
+    skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
+    smo = SMOTE(random_state=42)
+    scores=[]
+
+    for train_index, test_index in skf.split(X, y):
+        current_train_fold_y = y.iloc[train_index]
+        current_train_fold_X = X.iloc[train_index]
+        current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
+        current_test_fold_y = y.iloc[test_index]
+        current_test_fold_X = X.iloc[test_index]
+        model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
+        temp_pred = model.predict(current_test_fold_X)
+        scores.append(f1_score(current_test_fold_y, temp_pred, average="macro"))
+
+
+    return np.array(scores, dtype=np.float32)
+
 
 def stratified_cross_fold_validator(X, y, folds, model, num_workers=10):
     skf = StratifiedKFold(n_splits=folds, shuffle=False)
@@ -68,6 +87,16 @@ def stratified_cross_fold_validator(X, y, folds, model, num_workers=10):
 
     return np.array(scores, dtype=np.float32)
 
+def cross_fold_validator(X, y, folds, model, num_workers=10):
+    kf = KFold(n_splits=folds, shuffle=False)
+    args_list = [(X, y, train_index, test_index, model) for train_index, test_index in kf.split(X, y)]
+
+    with Pool(num_workers) as pool:
+        scores = pool.map(worker_standart, args_list)
+    pool.close()
+    pool.join()
+
+    return np.array(scores, dtype=np.float32)
 
 def removeOutlier(X, y):
     # outlier detection

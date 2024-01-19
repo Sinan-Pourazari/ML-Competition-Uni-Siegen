@@ -1,54 +1,35 @@
 import lenskit
 from lenskit.datasets import ML100K
 from lenskit import batch, topn, util
-from lenskit import crossfold as xf
 from lenskit.algorithms import Recommender, als, item_knn as knn, svd
-from lenskit import topn
-from lenskit.metrics.predict import rmse
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from collections import Counter
-
-
-def train(algo, train):
-    fittable = util.clone(algo)
-    fittable.fit(train)
-
-    return fittable
-
 
 
 #read csv
 features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
+test = pd.read_csv('test_features.csv')
 
 #megre to remove all duplicates
-data = pd.merge(features, labels, on='Id')
+train = pd.merge(features, labels, on='Id')
 
 #drop duplicate rows
-data.drop_duplicates(keep='first', inplace=True)
-#split it for the train test split
-labels = data['rating']
-features = data.drop(['rating'], axis=1)
+train.drop_duplicates(keep='first', inplace=True)
 
-train, test = train_test_split(data, test_size= 0.1, random_state= 532)
 
 
 #drop the id
 train.drop(['Id'], axis=1, inplace=True)
 test.drop(['Id'], axis=1, inplace=True)
 
-#seperate label from features in test set
-test_label = test['rating']
-test_feature = test.drop(['rating'], axis=1, inplace = False)
-
 #basic algorithms
 algo_ii = knn.ItemItem(20)
 algo_als = als.BiasedMF(50)
-model_before_2010 = svd.BiasedSVD(50, damping=5, bias=True)
-model_after_2010 = svd.BiasedSVD(50, damping=5, bias=True)
+model_before_2010 = als.BiasedMF(features=100, iterations=30, reg=0.15, damping=10, bias=True, method='lu')
+model_after_2010 = als.BiasedMF(features=100, iterations=30, reg=0.15, damping=10, bias=True, method='lu')
 
 
 
@@ -87,12 +68,16 @@ if __name__ == '__main__':
     pred = np.nan_to_num(pred,copy=True, nan=5)
 
 
-    ret = [round(x) for x in pred]
+    result = [round(x) for x in pred]
 
-
-    print(np.sqrt(mean_squared_error(test_label, ret)))
-
-
-
+    idarr = np.array([])
+    for i in range(len(result)):
+        idarr = np.append(idarr, i)
+    # make pd dataframe with id as axis 0 and the rusulst as label 1 with the results
+    return_value = pd.DataFrame({'Id': idarr, 'Predicted': result})
+    return_value = return_value.astype(int)
+    print(return_value)
+    # save it as file
+    return_value.to_csv('Lenskit_BiasedMF4.1.csv', columns=['Id', 'Predicted'], index=False)
 
 

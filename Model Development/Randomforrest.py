@@ -9,18 +9,11 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import RFECV
 from Custom_Methods import *
 
-def Feature_Elminination_CV(model,dataX,datay):
-    # RFECV
-    selector = RFECV(model, step=1, cv=5, n_jobs=-1, verbose=True, min_features_to_select=20)
-    selector = selector.fit(dataX, datay)
-    sel= selector.get_support()
-    print(sel)
-    return sel
-
 def Run(X,y):
 
     #build randomforrest
-    randomforest=RandomForestClassifier(random_state=211, n_estimators=100, criterion='gini', min_samples_split=3, n_jobs=-1, verbose=False)
+    randomforest=RandomForestClassifier(random_state=21, n_estimators=64, criterion='entropy', min_samples_split=2, n_jobs=1,max_depth=1409,
+                                        max_features='sqrt', max_leaf_nodes=138, min_samples_leaf=3,verbose=False, min_weight_fraction_leaf=0.00215566094893653)
 
 
     # split the data
