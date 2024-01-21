@@ -11,6 +11,7 @@ from sklearn.utils import resample
 from sklearn.inspection import permutation_importance
 from sklearn.feature_selection import SelectKBest, f_classif,mutual_info_classif
 from sklearn.utils.class_weight import compute_sample_weight
+from Custom_Methods import *
 def Run(Xtrain,ytrain,Xtest,ytest):
 
     #define model parameters
@@ -46,9 +47,9 @@ def Run(Xtrain,ytrain,Xtest,ytest):
     tn, fp, fn, tp = confusion_matrix(ytest, pred).ravel()
     print('tn: ', tn, 'tp: ', tp, 'fn: ', fn, 'fp: ', fp)
 
-    scores = cross_val_score(GBmodel, Xtrain, ytrain, cv=5, scoring='f1_macro', n_jobs=-1)
+    scores = cross_fold_validator(Xtrain, ytrain, 10, GBmodel)
     print(scores)
-    print("%0.2f F1-Macro with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
+    print("%0.7f F1-Macro with a standard deviation of %0.3f" % (scores.mean(), scores.std()))
     return score
 
 #read csv
@@ -68,7 +69,7 @@ print(SelectKBest.get_feature_names_out(SKB))'''
 
 
 #train test split before resampling to get "pure" test data
-Xtrain, Xtest, ytrain, ytest = train_test_split(features, labels, test_size=0.1, random_state=26881)
+Xtrain, Xtest, ytrain, ytest = train_test_split(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13', 'feature_25', 'feature_9']], labels, test_size=0.1, random_state=26881)
 
 '''#resample to counter inbalance
 #merge labels to the corosponding sampels
@@ -110,10 +111,10 @@ ytrain.drop(['Id'], axis=1, inplace=True)'''
 
 #convert to numpyarray
 #Xtrain=Xtrain.to_numpy()
-ytrain=ytrain.to_numpy().flatten()
-ytest = ytest.to_numpy().flatten()
+#ytrain=ytrain.to_numpy().flatten()
+#ytest = ytest.to_numpy().flatten()
 #Xtest = Xtest.to_numpy()
 
 
-
-print(Run(Xtrain,ytrain,Xtest,ytest))
+if __name__ == '__main__':
+    print(Run(Xtrain,ytrain,Xtest,ytest))

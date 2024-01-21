@@ -9,10 +9,11 @@ from itertools import permutations
 from warnings import warn
 from progress.bar import Bar
 from tqdm.auto import tqdm
+import math
 
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
            'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator', 'stratified_cross_fold_validator_for_smote_single',
-           'cross_fold_validator']
+           'cross_fold_validator', 'read_data']
 
 
 # needs pandas dataframe to work
@@ -183,8 +184,10 @@ def permutation_tester(X, y, model, verbose=False):
     names = list(X.columns)
     best_score = 0
     best_order = ''
-    perms = permutations(names)
-    progress_bar = tqdm(total=len(list(perms)), position=0, desc="Sequential Feature Selector",leave=True)
+    perms = permutations(names, len(names))
+    print(math.factorial(len(names)))
+    print('#####')
+    progress_bar = tqdm(total=math.factorial(len(X.columns)), position=0, desc="Permutation tester")
     for perm in permutations(perms):
         perm = list(perm)
         temp = np.mean(stratified_cross_fold_validator(X[perm], y, 5, model))
@@ -193,16 +196,18 @@ def permutation_tester(X, y, model, verbose=False):
             best_order = perm
             if verbose == True:
                 print('new best order: ', best_order, 'with score: ', best_score)
-                progress_bar.update(1)
+    if verbose:
+        progress_bar.update(1)
     return best_order
 
 
 
 
 '#read the csv files'
-def read_data(feature_path='train_features.csv', label_path='train_label.csv'):
+def read_data(feature_path ='train_features.csv', label_path='train_label.csv'):
     features = pd.read_csv(feature_path)
     labels = pd.read_csv(label_path)
+    labels.drop(['Id'],axis=1,inplace=True)
     return features, labels
 
 def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =False):

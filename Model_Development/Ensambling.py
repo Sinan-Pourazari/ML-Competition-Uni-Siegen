@@ -4,6 +4,8 @@ from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier,
 from Custom_Methods import *
 from sklearn.ensemble import StackingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 def Run(Xtrain, ytrain):
     # define model parameters
@@ -18,8 +20,7 @@ def Run(Xtrain, ytrain):
 
     ABCRDMFR= AdaBoostClassifier( estimator= RDMForest ,n_estimators=200, random_state=211, learning_rate=1, algorithm='SAMME.R')
     ABCGB= AdaBoostClassifier( estimator= GBmodelada ,n_estimators=200, random_state=211, learning_rate=1, algorithm='SAMME.R')
-
-
+    svc = SVC(random_state=211)
 
     #order= permutation_tester(Xtrain,ytrain,GBmodel,verbose=True)
     #to preven dataleak each train fold is oversampled indepenantly
@@ -28,8 +29,11 @@ def Run(Xtrain, ytrain):
                 ('rdm', randomforest),
                  ('AdaGradient', ABCGB),
                  ('AdaRDM', ABCRDMFR)
+               #  ('supportVector', svc)
                  ]
-    clf = StackingClassifier(estimators=estimators, final_estimator= GradientBoostingClassifier(), stack_method='predict', verbose= 100, passthrough=False)
+    clf = StackingClassifier(estimators=estimators,
+                             final_estimator= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211, loss='log_loss', criterion='friedman_mse'),
+                             stack_method='predict', verbose= 100, passthrough=False, cv= 4)
     scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 10, clf, num_workers=5)
     scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, clf, num_workers=5)
 
@@ -38,7 +42,7 @@ def Run(Xtrain, ytrain):
     print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
 
 
-
+    return
     clf.fit(Xtrain,ytrain.to_numpy().flatten())
     test = pd.read_csv('test_features.csv')
     pred = clf.predict(test[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13']])
