@@ -32,8 +32,8 @@ test = pd.read_csv('test_features.csv')
 
 labels.drop(['Id'], inplace=True, axis=1)
 
-features = features[ ['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13', 'feature_25']]
-test = test[ ['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13', 'feature_25']]
+features = features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25']]
+test = test[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25']]
 
 features, labels = removeOutlier(features,labels)
 smo = SMOTE(random_state=42, n_jobs=-1)
@@ -56,4 +56,4 @@ return_value = pd.DataFrame({'Id': idarr, 'Predicted': result})
 return_value = return_value.astype(int)
 print(return_value)
 # save it as file
-return_value.to_csv('GBC52.csv', columns=['Id', 'Predicted'], index=False)
+return_value.to_csv('GBC53.csv', columns=['Id', 'Predicted'], index=False)

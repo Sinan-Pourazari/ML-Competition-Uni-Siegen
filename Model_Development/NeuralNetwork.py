@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, MinMaxScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import VarianceThreshold
 
@@ -13,12 +13,14 @@ def Run(X,y):
     # scale
     Xtrain = scale(Xtrain)
     Xtest = scale(Xtest)
-
+    scaler = MinMaxScaler()
+    #Xtrain = scaler.fit_transform(Xtrain)
+    #Xtest = scaler.fit_transform(Xtest)
     #make model
-    MLPC = MLPClassifier(random_state=211,max_iter=99999, learning_rate_init=0.00419,
+    MLPC = MLPClassifier(random_state=211,max_iter=223, learning_rate_init=0.00419,
                          solver='sgd', learning_rate='adaptive', activation='relu',
                          shuffle= True, n_iter_no_change=3, momentum= 0.9, nesterovs_momentum= True,
-                         hidden_layer_sizes=(100,), tol= 1e-4, verbose=True)
+                         hidden_layer_sizes=(100,), tol= 1e-4, verbose=True, early_stopping=False)
 
     #MLPC = MLPClassifier(random_state=211, max_iter=10000)
 

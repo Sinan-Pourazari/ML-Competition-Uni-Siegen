@@ -150,7 +150,7 @@ def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = Fal
         for j in range(len(names)):
             '#take current selected features and not yet selected feature to try'
             curr_feature_list = selected_features + [names[j]]
-            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
+            temp_score = np.mean(stratified_cross_fold_validator_for_smote(X[curr_feature_list], y, 10, model, num_workers=10))
             if curr_best_score < temp_score:
                 curr_best_score = temp_score
                 curr_best_feature = names[j]

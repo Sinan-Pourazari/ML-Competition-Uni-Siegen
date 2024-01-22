@@ -9,10 +9,9 @@ def Run(Xtrain,ytrain):
                                          verbose=False,
                                          loss='log_loss', criterion='friedman_mse')
     # split the data
-    #selected = sequential_feature_selector(Xtrain, ytrain, GBmodel, verbose=True, remove_outlier=True)
-    selected = permutation_tester(Xtrain,ytrain,model=GBmodel, verbose= True)
+    selected = sequential_feature_selector(Xtrain, ytrain, GBmodel, verbose=True, remove_outlier=True )
+    GBmodel.fit(Xtrain, ytrain.to_numpy().flatten())
     print(selected)
-
     #make Prediction
     #1 dump(GBmodel, 'Model versions for Kaggle Submit/GBmodel6_wo_f2_downsamp_IMBLearn_NearMiss')
     scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 10, GBmodel)
@@ -26,10 +25,10 @@ features = pd.read_csv('train_features.csv')
 labels = pd.read_csv('train_label.csv')
 
 #drop the id
-features = features.drop(['Id'], axis=1)
+features = features.drop(['Id','feature_2' ], axis=1)
 labels = labels.drop(['Id'], axis=1)
 if __name__ == '__main__':
-    Run(features[],labels)
+    Run(features,labels)
 
 
 
