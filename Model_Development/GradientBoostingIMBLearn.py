@@ -10,13 +10,13 @@ def Run(Xtrain, ytrain):
 
     #order= permutation_tester(Xtrain,ytrain,GBmodel,verbose=True)
     #to preven dataleak each train fold is oversampled indepenantly
-    scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, GBmodel)
+    #scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, GBmodel)
 
     scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 10, GBmodel)
 
     print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
 
-    print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
+    #print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
 
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, AdaBoostClassifier
 from Custom_Methods import *
-from sklearn.ensemble import StackingClassifier
+from sklearn.ensemble import StackingClassifier, BaggingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -34,12 +34,14 @@ def Run(Xtrain, ytrain):
     clf = StackingClassifier(estimators=estimators,
                              final_estimator= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211, loss='log_loss', criterion='friedman_mse'),
                              stack_method='predict', verbose= 100, passthrough=False, cv= 4)
-    scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 10, clf, num_workers=5)
-    scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, clf, num_workers=5)
+    for i in range(1,100):
+        bc = BaggingClassifier(estimator=GBmodel, n_estimators=i, bootstrap= False, bootstrap_features=True, verbose=0, random_state=211)
+        scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 5, bc, num_workers=5)
+        scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, bc, num_workers=5)
 
-    print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
+        #print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
 
-    print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
+        print('estimators: ',  i, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
 
 
     return
@@ -60,7 +62,7 @@ labels = labels.drop(['Id'], axis=1)
 # drop features without information
 #features.drop(['feature_2', 'feature_12'], axis=1, inplace=True)
 
-features, labels = removeOutlier(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13']], labels)
+features, labels = removeOutlier(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25']], labels)
 if __name__ == '__main__':
     result = Run(features, labels)
 
