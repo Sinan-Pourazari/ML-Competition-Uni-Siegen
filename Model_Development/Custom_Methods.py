@@ -10,6 +10,8 @@ from warnings import warn
 from progress.bar import Bar
 from tqdm.auto import tqdm
 import math
+from contextlib import redirect_stdout
+from io import StringIO
 
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
            'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator', 'stratified_cross_fold_validator_for_smote_single',
@@ -23,24 +25,41 @@ def worker_oversample(args):
     X, y, train_index, test_index, model = args
     smo = SMOTE(random_state=42)
 
+    temp = StringIO()
     current_train_fold_y = y.iloc[train_index]
     current_train_fold_X = X.iloc[train_index]
     current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
     current_test_fold_y = y.iloc[test_index]
     current_test_fold_X = X.iloc[test_index]
-    model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
+    with redirect_stdout(temp):
+        model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
     temp_pred = model.predict(current_test_fold_X)
     return f1_score(current_test_fold_y, temp_pred, average="macro")
+
+def worker_oversample_LGBM(args):
+    def worker_oversample(args):
+        X, y, train_index, test_index, model = args
+        smo = SMOTE(random_state=42)
+
+        current_train_fold_y = y.iloc[train_index]
+        current_train_fold_X = X.iloc[train_index]
+        current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
+        current_test_fold_y = y.iloc[test_index]
+        current_test_fold_X = X.iloc[test_index]
+        model.train(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
+        temp_pred = model.predict(current_test_fold_X)
+        return f1_score(current_test_fold_y, temp_pred, average="macro")
 
 
 def worker_standart(args):
     X, y, train_index, test_index, model = args
-
+    temp=StringIO()
     current_train_fold_y = y.iloc[train_index]
     current_train_fold_X = X.iloc[train_index]
     current_test_fold_y = y.iloc[test_index]
     current_test_fold_X = X.iloc[test_index]
-    model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
+    with redirect_stdout(temp):
+        model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
     temp_pred = model.predict(current_test_fold_X)
     return f1_score(current_test_fold_y, temp_pred, average="macro")
 
@@ -111,11 +130,38 @@ def removeOutlier(X, y):
     repeats = len(X)
     for i in range(repeats):
         if outliers[i] == 0:
-            X.drop(index=i, axis=0, inplace=True)
-            y.drop(index=i, axis=0, inplace=True)
+            X= X.drop(index=i, axis=0, inplace=False)
+            y= y.drop(index=i, axis=0, inplace=False)
     # return values
     return X, y
 
+def cap_Outlier(X, y):
+    # outlier detection
+    lof = LocalOutlierFactor(n_neighbors=20)
+    outliers = lof.fit_predict(X)
+
+    # convert -1 to 0 for boolean indexing
+    outliers[outliers == -1] = 0
+
+    #iqr
+    Q1 = X.quantile(0.25)
+    Q3 = X.quantile(0.75)
+
+    #calculate IQR
+    IQR = Q3 -Q1
+
+    #define bounds
+    lowerbound = Q1 - (1.5 * IQR)
+    upperbound = Q3 + (1.5 * IQR)
+
+    # outlier removal
+    repeats = len(X)
+    for i in range(repeats):
+        if outliers[i] == 0:
+            X = X.iloc[i]
+            y.drop(index=i, axis=0, inplace=True)
+    # return values
+    return X, y
 
 # needs Pandas dataframe to work
 def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = False):

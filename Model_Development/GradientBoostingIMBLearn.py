@@ -10,13 +10,13 @@ def Run(Xtrain, ytrain):
 
     #order= permutation_tester(Xtrain,ytrain,GBmodel,verbose=True)
     #to preven dataleak each train fold is oversampled indepenantly
-    #scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, GBmodel)
+    scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, GBmodel)
 
     scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 10, GBmodel)
 
     print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
 
-    #print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
+    print('scores: ', scores_no_smote, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
 
 
 
@@ -34,4 +34,4 @@ labels = labels.drop(['Id'], axis=1)
 
 features, labels = removeOutlier(features, labels)
 if __name__ == '__main__':
-    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25']], labels)
+    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25', 'feature_22', 'feature_20', 'feature_29', 'feature_5', 'feature_1', 'feature_3', 'feature_8']], labels)

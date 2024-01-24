@@ -34,14 +34,12 @@ def Run(Xtrain, ytrain):
     clf = StackingClassifier(estimators=estimators,
                              final_estimator= GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211, loss='log_loss', criterion='friedman_mse'),
                              stack_method='predict', verbose= 100, passthrough=False, cv= 4)
-    for i in range(1,100):
-        bc = BaggingClassifier(estimator=GBmodel, n_estimators=i, bootstrap= False, bootstrap_features=True, verbose=0, random_state=211)
-        scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 5, bc, num_workers=5)
-        scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, bc, num_workers=5)
+    bc = BaggingClassifier(estimator=GBmodel, n_estimators=10, bootstrap= False, bootstrap_features=True, verbose=100, random_state=211)
+    #scores = stratified_cross_fold_validator_for_smote(Xtrain, ytrain, 5, bc, num_workers=5)
+    scores_no_smote = stratified_cross_fold_validator(Xtrain, ytrain, 10, bc, num_workers=5)
 
-        #print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
-
-        print('estimators: ',  i, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
+    #print('scores smote: ', scores, "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores), np.std(scores)))
+    print('estimators: ', "%0.7f F1-Macro with a standard deviation of %0.3f" % (np.mean(scores_no_smote), np.std(scores_no_smote)))
 
 
     return

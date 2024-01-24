@@ -9,7 +9,7 @@ def Run(Xtrain,ytrain):
                                          verbose=False,
                                          loss='log_loss', criterion='friedman_mse')
     # split the data
-    selected = sequential_feature_selector(Xtrain, ytrain, GBmodel, verbose=True, remove_outlier=True )
+    selected = sequential_feature_eliminator(Xtrain, ytrain, GBmodel, verbose=True, remove_outlier=True )
     GBmodel.fit(Xtrain, ytrain.to_numpy().flatten())
     print(selected)
     #make Prediction
@@ -28,7 +28,7 @@ labels = pd.read_csv('train_label.csv')
 features = features.drop(['Id','feature_2' ], axis=1)
 labels = labels.drop(['Id'], axis=1)
 if __name__ == '__main__':
-    Run(features,labels)
+    Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25', 'feature_22', 'feature_20', 'feature_29', 'feature_5', 'feature_1', 'feature_3', 'feature_8']],labels)
 
 
 
