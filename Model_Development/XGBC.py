@@ -4,9 +4,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import scale
-from lightgbm import LGBMClassifier
 from Custom_Methods import*
-
+import xgboost as xgb
 def Run(Xtrain, ytrain):
     #feature_names = list(features)
     #Xtrain, ytrain = removeOutlier(features,labels)
@@ -14,8 +13,7 @@ def Run(Xtrain, ytrain):
 
 
     #train model
-    model = LGBMClassifier(n_jobs=-1, random_state=211, boosting_type='dart', objective='binary',num_leaves=501, learning_rate=0.01, n_estimators=2000,
-                           max_depth=-1, importance_type='split')
+    model = xgb.XGBClassifier(tree_method='hist', booster='gbtree', learning_rate=0.1, max_depth=14, n_estimators=155)
 
     #selected = sequential_feature_selector(Xtrain, ytrain, model, verbose=True, remove_outlier=True )
 
