@@ -4,6 +4,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from Custom_Methods import *
 
 def Run(Xtrain, ytrain):
+    #Xtrain = cap_Outlier(Xtrain)
     # define model parameters
     GBmodel = GradientBoostingClassifier(n_estimators=100,learning_rate=0.1,max_depth=10, random_state=211,verbose=False,
                                         loss='log_loss', criterion='friedman_mse')
@@ -20,18 +21,18 @@ def Run(Xtrain, ytrain):
 
 
 
-# read csv
-features = pd.read_csv('train_features.csv')
-labels = pd.read_csv('train_label.csv')
 
 
-# drop the id
-features = features.drop(['Id'], axis=1)
-labels = labels.drop(['Id'], axis=1)
-
-# drop features without information
-#features.drop(['feature_2', 'feature_12'], axis=1, inplace=True)
-
-features, labels = removeOutlier(features, labels)
 if __name__ == '__main__':
-    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25', 'feature_22', 'feature_20', 'feature_29', 'feature_5', 'feature_1', 'feature_3', 'feature_8']], labels)
+    # read csv
+    features = pd.read_csv('train_features.csv')
+    labels = pd.read_csv('train_label.csv')
+
+    # drop the id
+    labels = labels.drop(['Id'], axis=1)
+
+    # drop features without information
+    # features.drop(['feature_2', 'feature_12'], axis=1, inplace=True)
+    features = cap_Outlier(features)
+
+    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_0', 'feature_12', 'feature_13']], labels)

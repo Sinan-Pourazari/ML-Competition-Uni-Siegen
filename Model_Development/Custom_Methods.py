@@ -7,6 +7,7 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import f1_score
 from itertools import permutations
 from warnings import warn
+from sklearn.ensemble import IsolationForest
 from progress.bar import Bar
 from tqdm.auto import tqdm
 import math
@@ -15,7 +16,7 @@ from io import StringIO
 
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
            'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator', 'stratified_cross_fold_validator_for_smote_single',
-           'cross_fold_validator', 'read_data']
+           'cross_fold_validator', 'read_data', 'cap_Outlier']
 
 
 # needs pandas dataframe to work
@@ -119,6 +120,7 @@ def cross_fold_validator(X, y, folds, model, num_workers=10):
     return np.array(scores, dtype=np.float32)
 
 def removeOutlier(X, y):
+    print('###########')
     # outlier detection
     lof = LocalOutlierFactor(n_neighbors=20)
     outliers = lof.fit_predict(X)
@@ -135,33 +137,46 @@ def removeOutlier(X, y):
     # return values
     return X, y
 
-def cap_Outlier(X, y):
+def cap_Outlier(X):
+    pd.set_option("mode.copy_on_write", True)
+    names = list(X.columns)
+
     # outlier detection
-    lof = LocalOutlierFactor(n_neighbors=20)
+    lof = IsolationForest(n_jobs=-1,random_state=211, bootstrap=True)
     outliers = lof.fit_predict(X)
 
     # convert -1 to 0 for boolean indexing
     outliers[outliers == -1] = 0
 
-    #iqr
-    Q1 = X.quantile(0.25)
-    Q3 = X.quantile(0.75)
+    bounds=[]
 
-    #calculate IQR
-    IQR = Q3 -Q1
+    for column in names:
+        #Quartiles
+        Q1 = X[column].quantile(0.25)
+        Q3 = X[column].quantile(0.75)
 
-    #define bounds
-    lowerbound = Q1 - (1.5 * IQR)
-    upperbound = Q3 + (1.5 * IQR)
+        #calculate IQR
+        IQR = Q3 - Q1
 
-    # outlier removal
+        #define bounds
+        lowerbound = Q1 - (1.5 * IQR)
+        upperbound = Q3 + (1.5 * IQR)
+        #print(lowerbound,upperbound)
+
+        bounds.append((lowerbound,upperbound))
+
+    #cap the outliers
     repeats = len(X)
     for i in range(repeats):
         if outliers[i] == 0:
-            X = X.iloc[i]
-            y.drop(index=i, axis=0, inplace=True)
+            for j in range(len(list(X.columns))):
+                low, up = bounds[j]
+                if X.iloc[i,j] < low:
+                    X.iloc[i,j] = low
+                elif X.iloc[i,j] > up:
+                    X.iloc[i,j] = up
     # return values
-    return X, y
+    return X
 
 # needs Pandas dataframe to work
 def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = False):
@@ -169,7 +184,7 @@ def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = Fal
         'The method sequentail_feature_selector needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
     if remove_outlier:
-        X, y = removeOutlier(X,y)
+        X = cap_Outlier(X)
     # number of features
     n_features = len(X.columns)
 
@@ -196,7 +211,7 @@ def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = Fal
         for j in range(len(names)):
             '#take current selected features and not yet selected feature to try'
             curr_feature_list = selected_features + [names[j]]
-            temp_score = np.mean(stratified_cross_fold_validator_for_smote(X[curr_feature_list], y, 10, model, num_workers=10))
+            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 10, model, num_workers=10))
             if curr_best_score < temp_score:
                 curr_best_score = temp_score
                 curr_best_feature = names[j]
@@ -261,7 +276,7 @@ def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =Fa
         'The method sequentail_feature_eliminator needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
     if remove_outlier:
-        X, y =removeOutlier(X,y)
+        X=cap_Outlier(X)
     # number of features
     n_features = len(X.columns)
 
@@ -279,7 +294,6 @@ def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =Fa
     overall_best_score = 0
 
     for i in range(len(X.columns)):
-        print(i)
         curr_best_score = 0
         curr_worst_feature = ''
 
@@ -288,7 +302,7 @@ def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =Fa
             # take current selected features and not yet selected feature to try
             curr_feature_list = selected_features.copy()
             curr_feature_list.remove(names[j])
-            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
+            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 10, model))
 
             if curr_best_score < temp_score:
                 curr_best_score = temp_score

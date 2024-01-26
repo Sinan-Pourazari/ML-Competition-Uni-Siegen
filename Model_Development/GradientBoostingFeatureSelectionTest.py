@@ -20,15 +20,16 @@ def Run(Xtrain,ytrain):
 
 
 
-#read csv
-features = pd.read_csv('train_features.csv')
-labels = pd.read_csv('train_label.csv')
 
-#drop the id
-features = features.drop(['Id','feature_2' ], axis=1)
-labels = labels.drop(['Id'], axis=1)
 if __name__ == '__main__':
-    Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25', 'feature_22', 'feature_20', 'feature_29', 'feature_5', 'feature_1', 'feature_3', 'feature_8']],labels)
+    # read csv
+    features = pd.read_csv('train_features.csv')
+    labels = pd.read_csv('train_label.csv')
+
+    # drop the id
+    features = features.drop(['Id', 'feature_2'], axis=1)
+    labels = labels.drop(['Id'], axis=1)
+    Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_0', 'feature_12', 'feature_13', 'feature_9', 'feature_10', 'feature_26', 'feature_4', 'feature_25', 'feature_29', 'feature_27', 'feature_22']],labels)
 
 
 
