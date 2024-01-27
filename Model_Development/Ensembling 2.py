@@ -103,8 +103,8 @@ if __name__ == '__main__':
     # drop features without information
     # features.drop(['feature_2', 'feature_12'], axis=1, inplace=True)
 
-    features = cap_Outlier(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13']])
-    result = Run(features, labels)
+    features, labels = removeOutlier(features,labels)
+    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_30', 'feature_29', 'feature_10', 'feature_13']], labels)
 
     idarr = np.array([])
     for i in range(len(result)):
