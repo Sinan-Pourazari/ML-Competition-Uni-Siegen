@@ -33,6 +33,6 @@ if __name__ == '__main__':
 
     # drop features without information
     # features.drop(['feature_2', 'feature_12'], axis=1, inplace=True)
-    features = cap_Outlier(features)
+    features ,labels= removeOutlier(features, labels)
 
-    result = Run(features[['feature_24', 'feature_16', 'feature_19', 'feature_17', 'feature_20', 'feature_0', 'feature_12', 'feature_13']], labels)
+    result = Run(features[['feature_24', 'feature_16', 'feature_27', 'feature_9', 'feature_29', 'feature_20', 'feature_19', 'feature_17', 'feature_25', 'feature_12', 'feature_10', 'feature_4', 'feature_13', 'feature_15']], labels)
