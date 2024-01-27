@@ -37,7 +37,7 @@ features = features[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'fe
 test = test[['feature_24', 'feature_16', 'feature_19', 'feature_11', 'feature_26', 'feature_9', 'feature_0', 'feature_10', 'feature_30', 'feature_25']]
 
 #remove outliers based on Local outlier Factor
-features, labels = removeOutlier(features,labels)
+features, labels = removeOutlier(features,labels, 51)
 
 # define SMOTE Parameters
 smo = SMOTE(random_state=42, n_jobs=-1)

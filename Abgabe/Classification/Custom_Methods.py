@@ -225,7 +225,7 @@ def cross_fold_validator(X, y, folds, model, num_workers=10):
     #return scores in numpy array
     return np.array(scores, dtype=np.float32)
 
-def removeOutlier(X, y):
+def removeOutlier(X, y, n):
     """
     this method removes outliers based on Sci-kit leanrs Local Outlier Factor
     :param X: pandas dataframe with features
@@ -233,7 +233,7 @@ def removeOutlier(X, y):
     :return:
     """
     # outlier detection
-    lof = LocalOutlierFactor(n_neighbors=20)
+    lof = LocalOutlierFactor(n_neighbors=n)
 
     #outliers are marked as -1
     outliers = lof.fit_predict(X)
