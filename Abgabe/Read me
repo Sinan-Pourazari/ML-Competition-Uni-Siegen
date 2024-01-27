@@ -1,0 +1,30 @@
+The files contained in these folders were used to generate the scores of the selected predictions on Kaggle.
+The Classification Folder Contains 3 files:
+
+1. The Custom Methods file contains different functions that were used to evaluate and train the models and preprocess the data.
+Each function in the file contains a description of what it is doing, as well as comments that describe the function step by step.
+The most important functions were: stratified_cross_fold_validator_for_smote, stratified_cross_fold_validator, Sequential feature selector, removeOutlier, and
+cap_Outlier.
+Each function only accepts pandas dataframes and most return pandas dataframes. Some functions support multiple workers.
+
+2. The GradientBoostingIMBLearnKaggle file is used to train and predict labels using Scikit-learn's Gradient Boosting Classifier.
+   It also does some preprocessing; at first, outliers are removed using custom_methods.removeOutlier, which is using Local Outlier Factor to detect outliers.
+   Then the CSV files are read and converted into Pandas dataframes. From these dataframes, only specific features, determined by Sequential Feature Selector, are used.
+   It then uses Imbalanced Learn's implementation of SMOTE to synthesize data to counteract the data imbalance.
+   The dataframe containing the labels is converted to a numpy array, and the ID is removed.
+   The next and last step is the definition of parameters for the Gradient Booster, training and predicting, after which a pandas dataframe is created with the predictions, which then
+   outputs a CSV file with the predictions and a corresponding ID.
+
+3. The file Ensembling 2 contains Gradient Boosters from Scikit-Learn, Light Gradient Boosting, and Extreme Gradient Boosting.
+   A stack classifier is used to combine them into one model. Each estimator is using different parameters to differentiate the results of each estimator.
+   It is fit on a set of features selected by a sequential feature selector for this model and uses Feature capping which selects features to cap using an isolation forest.
+   However, it is not using SMOTE or resampling, as it already performs well without it, and one of the selected models on Kaggle was supposed to be one not using SMOTE.
+
+The Regression Folder Contains 2 Files
+1. Lenskit v3.1 is using Lenskit. It first loads all three datasets and merges train features and train labels on the ID.
+   The ID is then removed, as well as all data before October 2012. After that, duplicate rows are removed.
+   Then a biased matrix factorization is trained and used to predict the ratings based on user and item ID.
+   In case that the model returns NONE or NaN values, they are replaced with the rounded average value of ratings.
+   The predictions are rounded to full numbers and returned into a dataframe, which outputs a CSV file.
+
+2. Lenskit v3.1 svd does the exact same but uses Biased SVD instead of biased MF.

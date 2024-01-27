@@ -112,6 +112,3 @@ if __name__ == '__main__':
     print(return_value)
     # save it as file
     return_value.to_csv('Enseble_GradienBoosterstemp.csv', columns=['Id', 'label'], index=False)
-
-
-

@@ -120,7 +120,6 @@ def cross_fold_validator(X, y, folds, model, num_workers=10):
     return np.array(scores, dtype=np.float32)
 
 def removeOutlier(X, y):
-    print('###########')
     # outlier detection
     lof = LocalOutlierFactor(n_neighbors=20)
     outliers = lof.fit_predict(X)

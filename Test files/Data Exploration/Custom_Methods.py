@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 from multiprocessing import Pool
 from sklearn.model_selection import StratifiedKFold, KFold
@@ -8,234 +7,121 @@ from imblearn.over_sampling import SMOTE
 from sklearn.metrics import f1_score
 from itertools import permutations
 from warnings import warn
+from sklearn.ensemble import IsolationForest
 
 from tqdm.auto import tqdm
 import math
+from contextlib import redirect_stdout
+from io import StringIO
 
 __all__ = ['stratified_cross_fold_validator', 'stratified_cross_fold_validator_for_smote', 'removeOutlier',
            'sequential_feature_selector', 'permutation_tester', 'sequential_feature_eliminator', 'stratified_cross_fold_validator_for_smote_single',
            'cross_fold_validator', 'read_data', 'cap_Outlier']
 
 
-
+# needs pandas dataframe to work
 
 
 def worker_oversample(args):
-    """
-    this function is called by stratified_cross_fold_for_smote. it recives
-    the features (X), the labels (y), train_index (indexes of the data used for training),
-    test_index (indexes of the data used for testing) and the model to evaluate.
-    This function essentaily gets one fold of cross-validation, perfmors upsampling
-     on that fold, and returns the F1- score after appling SMOTE and fitting the specified data
-    :param args:
-    :return F1 score:
-    """
-    #get parameters from args
     X, y, train_index, test_index, model = args
-
-    #SMOTE parameters
     smo = SMOTE(random_state=42)
 
-    #Index of data to be used to fit the model is used to get the training data seperated from test data
+    temp = StringIO()
     current_train_fold_y = y.iloc[train_index]
     current_train_fold_X = X.iloc[train_index]
-
-    #Oversampling the training data using SMOTE
     current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
-
-    #Index of the data used to test the model is used to get the test data seperated from training data
     current_test_fold_y = y.iloc[test_index]
     current_test_fold_X = X.iloc[test_index]
-
-    #fit the model with training data
-    model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
-
-    #make predictions
+    with redirect_stdout(temp):
+        model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
     temp_pred = model.predict(current_test_fold_X)
-
-    #calculate and return F1 macro score
     return f1_score(current_test_fold_y, temp_pred, average="macro")
+
+def worker_oversample_LGBM(args):
+    def worker_oversample(args):
+        X, y, train_index, test_index, model = args
+        smo = SMOTE(random_state=42)
+
+        current_train_fold_y = y.iloc[train_index]
+        current_train_fold_X = X.iloc[train_index]
+        current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
+        current_test_fold_y = y.iloc[test_index]
+        current_test_fold_X = X.iloc[test_index]
+        model.train(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
+        temp_pred = model.predict(current_test_fold_X)
+        return f1_score(current_test_fold_y, temp_pred, average="macro")
 
 
 def worker_standart(args):
-    """
-        this function is called by stratified_cross_fold. it recives
-        the features (X), the labels (y), train_index (indexes of the data used for training),
-        test_index (indexes of the data used for testing) and the model to evaluate.
-        this function essentaily gets one fold of crossvalidation an returns its results
-        :param args:
-        :return : F1 score
-        """
-
-    #get parameters from args
     X, y, train_index, test_index, model = args
-
-    # Index of data to be used to fit the model is used to get the training data seperated from test data
+    temp=StringIO()
     current_train_fold_y = y.iloc[train_index]
     current_train_fold_X = X.iloc[train_index]
-
-    #Index of the data used to test the model is used to get the test data seperated from training data
     current_test_fold_y = y.iloc[test_index]
     current_test_fold_X = X.iloc[test_index]
-
-    #fit the model with training data
-    model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
-
-    #make predictions
+    with redirect_stdout(temp):
+        model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
     temp_pred = model.predict(current_test_fold_X)
-
-    #calculate and return F1 macro score
     return f1_score(current_test_fold_y, temp_pred, average="macro")
 
 
 # needs pandas dataframe to work
 def stratified_cross_fold_validator_for_smote(X, y, folds, model, num_workers=10):
-    """
-        this function usues Sci-kit Learn's StratifiedKFold to get k folds and calculate the scores of
-        each fold. This version calls a worker which Performs SMOTE oversampling on each fold
-
-    :param X: Pandas dataframe containign the features
-    :param y: Pandas dataframe containing the labels
-    :param folds:   Int, number of folds
-    :param model:   untrained sklearn Model
-    :param num_workers: Int number of workers. if workers > folds, workers = folds
-    :return: numpy array with F1 macro scores of each fold
-    """
-
-    #get k folds
     skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
 
-    #parameters to pass to the workers
     args_list = [(X, y, train_index, test_index, model) for train_index, test_index in skf.split(X, y)]
 
-    #start n workers and wait for each worker to return its result
     with Pool(num_workers) as pool:
         scores = pool.map(worker_oversample, args_list)
-
-    #pool cleanup
     pool.close()
     pool.join()
 
-    #return numpy array with the results
     return np.array(scores, dtype=np.float32)
 
 def stratified_cross_fold_validator_for_smote_single(X, y, folds, model):
-    """
-        this function usues Sci-kit Learn's StratifiedKFold to get k folds and calculate the scores of
-        each fold. this version does not support multiple workers
-
-    :param X: Pandas dataframe containign the features
-    :param y: Pandas dataframe containing the labels
-    :param folds:   Int, number of folds
-    :param model:   untrained sklearn Model
-    :return: numpy array with F1 macro scores of each fold
-    """
-
-    #get the n folds
     skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
-
-    #SMOTE parameters
     smo = SMOTE(random_state=42)
-
-    #for now, empty array for scores
     scores=[]
 
-    #loop that itterates over the train and test folds
     for train_index, test_index in skf.split(X, y):
-
-        #Index of data to be used to fit the model is used to get the training data seperated from test data
         current_train_fold_y = y.iloc[train_index]
         current_train_fold_X = X.iloc[train_index]
-
-        # Oversampling the training data using SMOTE
         current_train_fold_X, current_train_fold_y = smo.fit_resample(current_train_fold_X, current_train_fold_y)
-
-        #Index of data to be used to test the model is used to get the training data seperated from test data
         current_test_fold_y = y.iloc[test_index]
         current_test_fold_X = X.iloc[test_index]
-
-        #fit the model with current fold
         model.fit(current_train_fold_X, current_train_fold_y.to_numpy().flatten())
-
-        #make predcictions on the current fold
         temp_pred = model.predict(current_test_fold_X)
-
-        #add the score of the predcition of the current fold to the array
         scores.append(f1_score(current_test_fold_y, temp_pred, average="macro"))
 
-    #return numpy array with scores
+
     return np.array(scores, dtype=np.float32)
 
 
 def stratified_cross_fold_validator(X, y, folds, model, num_workers=10):
-    """
-        this function usues Sci-kit Learn's StratifiedKFold to get k folds and calculate the scores of
-        each fold. this version does not perform smote
-
-    :param X: Pandas dataframe containign the features
-    :param y: Pandas dataframe containing the labels
-    :param folds:   Int, number of folds
-    :param model:   untrained sklearn Model
-    :param num_workers: Int number of workers. if workers > folds, workers = folds
-    :return: numpy array with F1 macro scores of each fold
-    """
-    # get the n folds
     skf = StratifiedKFold(n_splits=folds, shuffle=False)
-
-    #parameters to pass to the workers
     args_list = [(X, y, train_index, test_index, model) for train_index, test_index in skf.split(X, y)]
 
-    #start n workers and wait for each worker to return its result
     with Pool(num_workers) as pool:
         scores = pool.map(worker_standart, args_list)
-
-    #pool cleanup
     pool.close()
     pool.join()
 
-    #return numpy array with scores
     return np.array(scores, dtype=np.float32)
 
 def cross_fold_validator(X, y, folds, model, num_workers=10):
-    """
-    this function usues Sci-kit Learn's KFold to get k folds and calculate the scores of
-        each fold. this version does not perform smote. it supports multiple workers
-
-    :param X:
-    :param y:
-    :param folds:
-    :param model:
-    :param num_workers:
-    :return:
-    """
-    #parameters for Kfold
     kf = KFold(n_splits=folds, shuffle=False)
-
-    #parameters to pass to the workers
     args_list = [(X, y, train_index, test_index, model) for train_index, test_index in kf.split(X, y)]
 
-    # start n workers and wait for each worker to return its result
     with Pool(num_workers) as pool:
         scores = pool.map(worker_standart, args_list)
-
-    #pool cleanup
     pool.close()
     pool.join()
 
-    #return scores in numpy array
     return np.array(scores, dtype=np.float32)
 
 def removeOutlier(X, y):
-    """
-    this method removes outliers based on Sci-kit leanrs Local Outlier Factor
-    :param X: pandas dataframe with features
-    :param y: pandas dataframe with labels
-    :return:
-    """
     # outlier detection
     lof = LocalOutlierFactor(n_neighbors=20)
-
-    #outliers are marked as -1
     outliers = lof.fit_predict(X)
 
     # convert -1 to 0 for boolean indexing
@@ -245,23 +131,17 @@ def removeOutlier(X, y):
     repeats = len(X)
     for i in range(repeats):
         if outliers[i] == 0:
-            X.drop(index=i, axis=0, inplace=True)
-            y.drop(index=i, axis=0, inplace=True)
+            X= X.drop(index=i, axis=0, inplace=False)
+            y= y.drop(index=i, axis=0, inplace=False)
     # return values
     return X, y
 
 def cap_Outlier(X):
-    """
-    This FUnction caps outliers. The outliers are Detected by an Isolation Forest and capped according to the upper and
-    lower bounds of the Inter Quartile Range
-    :param X:
-    :return:
-    """
     pd.set_option("mode.copy_on_write", True)
     names = list(X.columns)
 
     # outlier detection
-    lof = IsolationForest(n_jobs=-1,random_state=211, bootstrap=True, n_estimators= 700)
+    lof = IsolationForest(n_jobs=-1,random_state=211, bootstrap=True)
     outliers = lof.fit_predict(X)
 
     # convert -1 to 0 for boolean indexing
@@ -297,26 +177,13 @@ def cap_Outlier(X):
     # return values
     return X
 
-
-
 # needs Pandas dataframe to work
 def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = False):
-    """
-    Sequential feacture selector. does not use sklears oimplementation since sklearn only allows to get results for n
-    features. and each next n nets to start over. this just does all. can remove outliers before testing
-    :param X: pandas dataframe
-    :param y:   pabdas dataframe
-    :param model:   sklearn model
-    :param verbose: Boolean
-    :param remove_outlier: Boolean
-    :return:
-    """
-
     warn(
         'The method sequentail_feature_selector needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
     if remove_outlier:
-        X, y = removeOutlier(X,y)
+        X = cap_Outlier(X)
     # number of features
     n_features = len(X.columns)
 
@@ -343,7 +210,7 @@ def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = Fal
         for j in range(len(names)):
             '#take current selected features and not yet selected feature to try'
             curr_feature_list = selected_features + [names[j]]
-            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
+            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 10, model, num_workers=10))
             if curr_best_score < temp_score:
                 curr_best_score = temp_score
                 curr_best_feature = names[j]
@@ -373,30 +240,14 @@ def sequential_feature_selector(X, y, model, verbose=False, remove_outlier = Fal
 
 
 def permutation_tester(X, y, model, verbose=False):
-    """
-    this function tests all possible permutations. not realy usefull but was used for a test
-
-    :param X: pandas dataframe
-    :param y: pandas dataframe
-    :param model: skleanr model
-    :param verbose: Boolean
-    :return: string of combinations
-    """
-    warn('The Method permutation_terster does not support the use of multiple workers. it will take a very long time'
-         'running it to he end is not recomended, instead set verbose True and let it run some time')
-
-    #list of names of the features
+    warn('The Method permutation_terster does not support the use of multiple workers. it might take some time')
     names = list(X.columns)
-    #variables for the loop
     best_score = 0
     best_order = ''
-    #number of permutations
     perms = permutations(names, len(names))
-
-    #progressbar
+    print(math.factorial(len(names)))
+    print('#####')
     progress_bar = tqdm(total=math.factorial(len(X.columns)), position=0, desc="Permutation tester")
-
-    #loop that itterates thorugh the permutatuions
     for perm in permutations(perms):
         perm = list(perm)
         temp = np.mean(stratified_cross_fold_validator(X[perm], y, 5, model))
@@ -420,22 +271,11 @@ def read_data(feature_path ='train_features.csv', label_path='train_label.csv'):
     return features, labels
 
 def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =False):
-    """
-    Sequential feacture eliminator. does not use sklears oimplementation since sklearn only allows to get results for n
-    features. and each next n nets to start over. this just does all. can remove outliers before testing
-    :param X: pandas dataframe
-    :param y:   pabdas dataframe
-    :param model:   sklearn model
-    :param verbose: Boolean
-    :param remove_outlier: Boolean
-    :return:
-    """
-
     warn(
         'The method sequentail_feature_eliminator needs a lot of time by nature and it cant use multiple workers due to the usage of crossvalidation'
         'which uses multiple workers')
     if remove_outlier:
-        X, y =removeOutlier(X,y)
+        X=cap_Outlier(X)
     # number of features
     n_features = len(X.columns)
 
@@ -453,7 +293,6 @@ def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =Fa
     overall_best_score = 0
 
     for i in range(len(X.columns)):
-        print(i)
         curr_best_score = 0
         curr_worst_feature = ''
 
@@ -462,7 +301,7 @@ def sequential_feature_eliminator(X, y, model, verbose=False, remove_outlier =Fa
             # take current selected features and not yet selected feature to try
             curr_feature_list = selected_features.copy()
             curr_feature_list.remove(names[j])
-            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 5, model))
+            temp_score = np.mean(stratified_cross_fold_validator(X[curr_feature_list], y, 10, model))
 
             if curr_best_score < temp_score:
                 curr_best_score = temp_score
