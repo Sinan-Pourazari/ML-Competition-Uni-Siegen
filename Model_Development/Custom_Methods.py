@@ -142,7 +142,7 @@ def cap_Outlier(X):
     names = list(X.columns)
 
     # outlier detection
-    lof = IsolationForest(n_jobs=-1,random_state=211, bootstrap=True)
+    lof = IsolationForest(n_jobs=-1,random_state=211, bootstrap=True, n_estimators=700)
     outliers = lof.fit_predict(X)
 
     # convert -1 to 0 for boolean indexing

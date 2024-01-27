@@ -9,31 +9,17 @@ import pandas as pd
 import numpy as np
 
 def eval(algo, train, test):
-    """
-
-    :param algo: Defines the lenskit algortihm to be used for the model
-    :param train: test set
-    :param test: treain set
-    :return: predicitons
-    """
-    #the fittable is the algorithm used it is cloned dude to the recomendation from the getting started. although in this versoin of code it is useless
     fittable = util.clone(algo)
-
-    #the algortim is trained on the train data
     fittable.fit(train)
-
-    #the features from the test set used in the MF process
     users = test.user.array
     items = test.item.array
-
     #get ratings for NaN replacement
     ratings = train.rating.array
-
-    #replace NAN ratings wtih the rating tahat is most common
+    print(type(ratings))
     average_rating = np.bincount(ratings).argmax()
     print(average_rating)
-    # now run recomender
-
+    # now we run the recommender
+    #recs = batch.recommend(fittable, users, 100)
     recs=[]
     for i in range(len(users)):
         temp = fittable.predict_for_user(users[i], [items[i]])
@@ -54,36 +40,34 @@ def eval(algo, train, test):
 
 
 #read csv
-features = pd.read_csv('train_features.csv')
-labels = pd.read_csv('train_label.csv')
-test = pd.read_csv('test_features.csv')
 
-#merge train label an feature into one dataset
-data = pd.merge(features, labels, on='Id')
 
-#drop the id
-data = data.drop(['Id'], axis=1)
-test.drop(['Id'], axis=1, inplace=True)
 
-#filter out too old data
-data = data[data['timestamp']>= 1448838000000]
 
-#drop duplicate rows
-data.drop_duplicates(keep='first', inplace=True)
-
-#diferent algorithms
-algo_ii = knn.ItemItem(20)
-algo_als = als.BiasedMF(features=100, iterations=160, reg=0.15, damping=5, bias=True, method='cd')
-algo_svd = svd.BiasedSVD(100, damping=2, bias=True)
 
 
 if __name__ == '__main__':
+    features = pd.read_csv('train_features.csv')
+    labels = pd.read_csv('train_label.csv')
+    test = pd.read_csv('test_features.csv')
 
+    data = pd.merge(features, labels, on='Id')
 
-    #run the perdiciton
+    # drop the id
+    data = data.drop(['Id'], axis=1)
+    test.drop(['Id'], axis=1, inplace=True)
+    # drop duplicate rows
+    data = data[data['timestamp'] >= 1350000000000]
+
+    data.drop_duplicates(keep='first', inplace=True)
+
+    algo_ii = knn.ItemItem(20)
+    algo_als = als.BiasedMF(features=100, iterations=160, reg=0.15, damping=5, bias=True, method='cd')
+    algo_svd = svd.BiasedSVD(100, damping=2, bias=True)
+
+    #result = eval( algo_ii, data, test)
     result=eval( algo_als, data, test)
 
-    #make a retunr csv. this is possibly the most elaboarte way to do this.
     idarr = np.array([])
     for i in range(len(result)):
         idarr = np.append(idarr, i)
@@ -92,7 +76,7 @@ if __name__ == '__main__':
     return_value = return_value.astype(int)
     print(return_value)
     # save it as file
-    return_value.to_csv('Lenskit_BiasedMF3.csv', columns=['Id', 'Predicted'], index=False)
+    return_value.to_csv('Lenskit_BiasedSVD_FINAL2.csv', columns=['Id', 'Predicted'], index=False)
 
 
 
